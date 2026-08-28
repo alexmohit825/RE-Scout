@@ -2,14 +2,18 @@ name: RE Scout TestFlight Cloud Pipeline
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
+    tags:
+      - 'v*.*.*'
   workflow_dispatch:
     inputs:
       build_description:
         description: 'Build Description / TestFlight Release Notes'
         required: false
-        default: 'Automated TestFlight build from Antigravity'
+        default: 'Automated TestFlight build for RE Scout'
+
+permissions:
+  contents: write
 
 jobs:
   build-and-deploy:
@@ -20,6 +24,8 @@ jobs:
     steps:
       - name: 📥 Checkout Repository
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🛠️ Select Xcode 15.4 / 16.0
         run: |
@@ -28,6 +34,21 @@ jobs:
           sudo xcode-select -s /Applications/Xcode_15.4.app || sudo xcode-select -s /Applications/Xcode.app
           xcodebuild -version
           swift --version
+
+      - name: ⚙️ Install XcodeGen
+        run: brew install xcodegen
+
+      - name: 🏗️ Generate Native Xcode Project
+        run: xcodegen generate
+
+      - name: 🔄 Sync REScout.xcodeproj for Apple Xcode Cloud
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add -f REScout.xcodeproj
+          if git commit -m "chore: auto-sync REScout.xcodeproj for Apple Xcode Cloud & TestFlight"; then
+            git push origin main
+          fi
 
       - name: 🔑 Configure App Store Connect API Credentials
         env:
@@ -50,26 +71,11 @@ jobs:
             --apiKey "$ASC_KEY_ID" \
             --apiIssuer "$ASC_ISSUER_ID" || echo "✓ API Connection verified."
 
-      - name: 📦 Validate Swift Package & Native Module Compilation
+      - name: 📦 Validate iOS Build on Simulator
         run: |
-          if [ -d "ios" ]; then
-            cd ios
-          elif [ -d "value-re-scout/ios" ]; then
-            cd value-re-scout/ios
-          fi
-          echo "Compiling ValueREScout Swift library on macOS..."
-          swift build -v
-          echo "✓ Swift Package built successfully."
-
-      - name: 🏗️ Archive & Deliver to TestFlight
-        env:
-          ASC_KEY_ID: "38F6WA87DU"
-          ASC_ISSUER_ID: "73c7355a-beef-4d79-919d-c3d7dec7747a"
-        run: |
-          echo "========================================================="
-          echo "  🚀 RE SCOUT TESTFLIGHT CLOUD BUILD IN PROGRESS"
-          echo "========================================================="
-          echo "Target Architecture: iOS 17.0+ (ARM64)"
-          echo "Authentication: App Store Connect API Key ($ASC_KEY_ID)"
-          echo "Status: Native modules compiled and ready for distribution."
-          echo "✓ Cloud build pipeline executed successfully."
+          xcodebuild build \
+            -project REScout.xcodeproj \
+            -scheme REScout \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO
+          echo "✓ iOS Target compiled and validated successfully."

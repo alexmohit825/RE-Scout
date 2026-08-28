@@ -1,0 +1,28 @@
+name: REScout
+options:
+  bundleIdPrefix: com.Alex
+  xcodeVersion: "16.0"
+  deploymentTarget:
+    iOS: "17.0"
+settings:
+  PRODUCT_BUNDLE_IDENTIFIER: com.Alex.REScout
+  INFOPLIST_FILE: ios/ValueREScout/Info.plist
+  GENERATE_INFOPLIST_FILE: false
+  DEVELOPMENT_TEAM: "523MJL63MC"
+  CODE_SIGN_STYLE: Automatic
+  SWIFT_VERSION: "5.9"
+  CURRENT_PROJECT_VERSION: "1"
+  MARKETING_VERSION: "1.0"
+  ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+targets:
+  REScout:
+    type: application
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: ios/ValueREScout
+    settings:
+      INFOPLIST_FILE: ios/ValueREScout/Info.plist
+      PRODUCT_BUNDLE_IDENTIFIER: com.Alex.REScout
+      DEVELOPMENT_TEAM: "523MJL63MC"
+      ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
