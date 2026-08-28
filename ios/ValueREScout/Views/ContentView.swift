@@ -1,5 +1,6 @@
 import SwiftUI
 
+@MainActor
 public struct ContentView: View {
     @State private var viewModel = ScoutViewModel()
     @State private var isMapSheetPresented: Bool = true

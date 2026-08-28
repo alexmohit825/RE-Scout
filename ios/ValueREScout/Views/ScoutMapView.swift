@@ -1,6 +1,7 @@
 import SwiftUI
 import MapKit
 
+@MainActor
 public struct ScoutMapView: View {
     @Bindable var viewModel: ScoutViewModel
     

@@ -1,6 +1,7 @@
 import SwiftUI
 import Charts
 
+@MainActor
 public struct YieldScatterChartView: View {
     public let properties: [Property]
     public let regionLabel: String

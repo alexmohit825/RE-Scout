@@ -3,6 +3,7 @@ import VisionKit
 import AVFoundation
 
 #if os(iOS)
+@MainActor
 public struct VisionFlyerScannerView: View {
     @Environment(\.dismiss) private var dismiss
     @Bindable var viewModel: ScoutViewModel
@@ -237,6 +238,7 @@ private struct DataScannerRepresentable: UIViewControllerRepresentable {
     }
 }
 #else
+@MainActor
 public struct VisionFlyerScannerView: View {
     @Bindable var viewModel: ScoutViewModel
     public init(viewModel: ScoutViewModel) { self.viewModel = viewModel }

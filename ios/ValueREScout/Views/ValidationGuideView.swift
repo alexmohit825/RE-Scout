@@ -1,5 +1,6 @@
 import SwiftUI
 
+@MainActor
 public struct ValidationGuideView: View {
     @State private var selectedTab: Int = 0
 

@@ -1,5 +1,6 @@
 import SwiftUI
 
+@MainActor
 public struct ScoutTerminalView: View {
     @Bindable var viewModel: ScoutViewModel
 

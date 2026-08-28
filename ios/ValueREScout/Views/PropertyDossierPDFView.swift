@@ -1,5 +1,6 @@
 import SwiftUI
 
+@MainActor
 public struct PropertyDossierPDFView: View {
     public let property: Property
     public let loanModel: (loanAmount: Double, annualDebtService: Double, dscr: Double, cashOnCash: Double, debtYield: Double)

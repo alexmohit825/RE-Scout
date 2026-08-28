@@ -1,6 +1,11 @@
 import SwiftUI
 import MapKit
 
+#if canImport(UIKit)
+import UIKit
+#endif
+
+@MainActor
 public struct PropertyCardView: View {
     public let property: Property
     public var onRemove: (() -> Void)? = nil
@@ -40,84 +45,9 @@ public struct PropertyCardView: View {
 
     public var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            // Header: Address + Value Score Badge
-            HStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: 3) {
-                    HStack(spacing: 6) {
-                        Text(property.address)
-                            .font(.headline)
-                            .fontWeight(.bold)
-                            .foregroundColor(.primary)
-
-                        if let src = property.source, src.contains("Apple Intelligence") {
-                            Image(systemName: "apple.intelligence")
-                                .font(.caption)
-                                .foregroundColor(.teal)
-                        }
-                    }
-
-                    Text("\(property.city), \(property.state) • \(property.type.replacingOccurrences(of: "_", with: " ").capitalized)")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                }
-
-                Spacer()
-
-                // Value Score Pill
-                VStack(spacing: 2) {
-                    Text("\(property.valueScore)")
-                        .font(.system(size: 18, weight: .black, design: .rounded))
-                        .foregroundColor(scoreColor(property.valueScore))
-                    Text("VALUE SCORE")
-                        .font(.system(size: 8, weight: .bold))
-                        .foregroundColor(.secondary)
-                }
-                .padding(.horizontal, 10)
-                .padding(.vertical, 6)
-                .background(scoreColor(property.valueScore).opacity(0.12))
-                .cornerRadius(10)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 10)
-                        .stroke(scoreColor(property.valueScore).opacity(0.3), lineWidth: 1)
-                )
-            }
-
-            // Key Metrics Banner
-            HStack {
-                VStack(alignment: .leading, spacing: 1) {
-                    Text("Asking Price").font(.caption2).foregroundColor(.secondary)
-                    Text(formatCurrency(property.price)).font(.title3).fontWeight(.heavy)
-                }
-
-                Spacer()
-
-                VStack(alignment: .center, spacing: 1) {
-                    Text("In-Place Cap").font(.caption2).foregroundColor(.secondary)
-                    Text(String(format: "%.1f%%", property.metrics.capRate)).font(.title3).fontWeight(.heavy)
-                        .foregroundColor(.teal)
-                }
-
-                Spacer()
-
-                VStack(alignment: .trailing, spacing: 1) {
-                    Text("In-Place NOI").font(.caption2).foregroundColor(.secondary)
-                    Text(formatCurrency(property.metrics.noi)).font(.title3).fontWeight(.heavy)
-                }
-            }
-            .padding(.vertical, 10)
-            .padding(.horizontal, 14)
-            .background(Color.scoutSecondaryBackground)
-            .cornerRadius(10)
-
-            // Secondary Metric Chips
-            HStack(spacing: 8) {
-                metricChip(label: "Price/Unit", value: formatCurrency(property.metrics.pricePerUnit))
-                metricChip(label: "Price/SF", value: "$\(Int(property.metrics.pricePerSqFt))/sf")
-                metricChip(label: "Occupancy", value: "\(Int(property.metrics.occupancyRate))%")
-                if let units = property.metrics.unitCount {
-                    metricChip(label: "Units", value: "\(units)")
-                }
-            }
+            headerView
+            metricsBannerView
+            secondaryChipsView
 
             if let desc = property.description {
                 Text(desc)
@@ -126,197 +56,19 @@ public struct PropertyCardView: View {
                     .lineLimit(2)
             }
 
-            // Interactive Action Buttons
-            HStack(spacing: 8) {
-                // Toggle Mortgage Calculator Sheet
-                Button {
-                    withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
-                        isMortgageExpanded.toggle()
-                        ScoutHaptic.triggerLight()
-                    }
-                } label: {
-                    HStack(spacing: 4) {
-                        Image(systemName: isMortgageExpanded ? "chevron.up.circle.fill" : "slider.horizontal.3")
-                        Text(isMortgageExpanded ? "Hide Loan Model" : "Underwrite DSCR & Debt")
-                    }
-                    .font(.system(size: 11, weight: .bold))
-                    .foregroundColor(.teal)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
-                    .background(Color.teal.opacity(0.12))
-                    .cornerRadius(8)
-                }
+            actionButtonsView
 
-                // Municipal GIS Parcel Inspector
-                Button {
-                    withAnimation(.spring()) {
-                        isParcelExpanded.toggle()
-                        if isParcelExpanded && parcelData == nil {
-                            Task {
-                                isLoadingParcel = true
-                                parcelData = await OpenParcelRegistryService.shared.fetchParcelRecord(
-                                    for: property.id,
-                                    city: property.city,
-                                    state: property.state
-                                )
-                                isLoadingParcel = false
-                            }
-                        }
-                    }
-                } label: {
-                    HStack(spacing: 4) {
-                        Image(systemName: "map.fill")
-                        Text("GIS & Zoning")
-                    }
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(.primary)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
-                    .background(Color.scoutSecondaryBackground)
-                    .cornerRadius(8)
-                }
-
-                // Export 1-Page PDF Tear Sheet
-                Button {
-                    if let url = PDFExportService.shared.exportUnderwritingPDF(
-                        property: property,
-                        loanModel: loanCalculations,
-                        parcelData: parcelData
-                    ) {
-                        self.exportedPDFURL = url
-                        self.isSharePresented = true
-                    }
-                } label: {
-                    HStack(spacing: 4) {
-                        Image(systemName: "doc.text.fill")
-                        Text("PDF Memo")
-                    }
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(.teal)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
-                    .background(Color.teal.opacity(0.12))
-                    .cornerRadius(8)
-                }
-
-                Spacer()
-
-                // Remove Button (if custom)
-                if let onRemove = onRemove {
-                    Button(role: .destructive, action: onRemove) {
-                        Image(systemName: "trash")
-                            .font(.caption)
-                            .foregroundColor(.red.opacity(0.8))
-                    }
-                    .padding(6)
-                }
-            }
-            .sheet(isPresented: $isSharePresented) {
-                if let url = exportedPDFURL {
-                    ShareSheetRepresentable(activityItems: [url])
-                }
-            }
-
-            // Expanded Mortgage & DSCR Underwriting Panel
             if isMortgageExpanded {
-                VStack(alignment: .leading, spacing: 12) {
-                    Divider()
-
-                    Text("Institutional Debt Underwriting & Sensitivity")
-                        .font(.system(size: 12, weight: .bold))
-                        .foregroundColor(.primary)
-
-                    // Sliders
-                    VStack(spacing: 8) {
-                        sliderRow(label: "Down Payment", valueStr: "\(Int(downPaymentPct))%", value: $downPaymentPct, range: 10...50, step: 5)
-                        sliderRow(label: "Interest Rate", valueStr: String(format: "%.2f%%", interestRate), value: $interestRate, range: 4.5...10.0, step: 0.25)
-                        sliderRow(label: "Amortization", valueStr: "\(Int(amortYears)) Yrs", value: $amortYears, range: 15...30, step: 5)
-                    }
-
-                    // Result Grid
-                    HStack(spacing: 8) {
-                        resultBox(
-                            title: "DSCR Ratio",
-                            value: String(format: "%.2fx", loanCalculations.dscr),
-                            color: loanCalculations.dscr >= 1.25 ? .green : (loanCalculations.dscr >= 1.0 ? .orange : .red),
-                            caption: loanCalculations.dscr >= 1.25 ? "Lender Bankable" : "High Default Risk"
-                        )
-                        resultBox(
-                            title: "Cash-on-Cash",
-                            value: String(format: "%.1f%%", loanCalculations.cashOnCash),
-                            color: .teal,
-                            caption: "Net Equity Yield"
-                        )
-                        resultBox(
-                            title: "Debt Yield",
-                            value: String(format: "%.1f%%", loanCalculations.debtYield),
-                            color: .primary,
-                            caption: "NOI / Loan Size"
-                        )
-                    }
-
-                    HStack {
-                        Text("Annual Debt Service:")
-                            .font(.caption2)
-                            .foregroundColor(.secondary)
-                        Text(formatCurrency(loanCalculations.annualDebtService))
-                            .font(.caption2)
-                            .fontWeight(.bold)
-                        Spacer()
-                        Text("Loan Amount:")
-                            .font(.caption2)
-                            .foregroundColor(.secondary)
-                        Text(formatCurrency(loanCalculations.loanAmount))
-                            .font(.caption2)
-                            .fontWeight(.bold)
-                    }
-                }
-                .padding(12)
-                .background(Color.scoutSecondaryBackground)
-                .cornerRadius(10)
-                .transition(.opacity.combined(with: .move(edge: .top)))
+                mortgageUnderwritingView
             }
 
-            // Expanded GIS & Municipal Parcel Panel
             if isParcelExpanded {
-                VStack(alignment: .leading, spacing: 8) {
-                    Divider()
-                    HStack {
-                        Label("Municipal Tax Parcel & GIS Record", systemImage: "building.columns.fill")
-                            .font(.system(size: 11, weight: .bold))
-                            .foregroundColor(.primary)
-                        Spacer()
-                        if isLoadingParcel {
-                            ProgressView().scaleEffect(0.7)
-                        }
-                    }
-
-                    if let p = parcelData {
-                        VStack(alignment: .leading, spacing: 4) {
-                            HStack {
-                                Text("APN:").font(.caption2).foregroundColor(.secondary)
-                                Text(p.apn).font(.caption2).fontWeight(.mono)
-                                Spacer()
-                                Text("Zoning:").font(.caption2).foregroundColor(.secondary)
-                                Text(p.zoning).font(.caption2).fontWeight(.semibold)
-                            }
-                            HStack {
-                                Text("Assessed Value:").font(.caption2).foregroundColor(.secondary)
-                                Text(formatCurrency(p.totalAssessedValue)).font(.caption2).fontWeight(.semibold)
-                                Spacer()
-                                Text("Annual Property Tax:").font(.caption2).foregroundColor(.secondary)
-                                Text(formatCurrency(p.annualTax)).font(.caption2).fontWeight(.semibold)
-                            }
-                            HStack {
-                                Text("Flood Hazard:").font(.caption2).foregroundColor(.secondary)
-                                Text(p.floodZone).font(.caption2).foregroundColor(.green)
-                            }
-                        }
-                    }
-                }
-                .padding(10)
-                .background(Color.scoutSecondaryBackground)
-                .cornerRadius(8)
+                parcelInspectorView
+            }
+        }
+        .sheet(isPresented: $isSharePresented) {
+            if let url = exportedPDFURL {
+                ShareSheetRepresentable(activityItems: [url])
             }
         }
         .padding(16)
@@ -327,6 +79,269 @@ public struct PropertyCardView: View {
             RoundedRectangle(cornerRadius: 14)
                 .stroke(Color.gray.opacity(0.12), lineWidth: 1)
         )
+    }
+
+    // MARK: - Subviews
+    private var headerView: some View {
+        HStack(alignment: .top) {
+            VStack(alignment: .leading, spacing: 3) {
+                HStack(spacing: 6) {
+                    Text(property.address)
+                        .font(.headline)
+                        .fontWeight(.bold)
+                        .foregroundColor(.primary)
+
+                    if let src = property.source, src.contains("Apple Intelligence") {
+                        Image(systemName: "apple.intelligence")
+                            .font(.caption)
+                            .foregroundColor(.teal)
+                    }
+                }
+
+                Text("\(property.city), \(property.state) • \(property.type.replacingOccurrences(of: "_", with: " ").capitalized)")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+            }
+
+            Spacer()
+
+            VStack(spacing: 2) {
+                Text("\(property.valueScore)")
+                    .font(.system(size: 18, weight: .black, design: .rounded))
+                    .foregroundColor(scoreColor(property.valueScore))
+                Text("VALUE SCORE")
+                    .font(.system(size: 8, weight: .bold))
+                    .foregroundColor(.secondary)
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 6)
+            .background(scoreColor(property.valueScore).opacity(0.12))
+            .cornerRadius(10)
+            .overlay(
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(scoreColor(property.valueScore).opacity(0.3), lineWidth: 1)
+            )
+        }
+    }
+
+    private var metricsBannerView: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 1) {
+                Text("Asking Price").font(.caption2).foregroundColor(.secondary)
+                Text(formatCurrency(property.price)).font(.title3).fontWeight(.heavy)
+            }
+
+            Spacer()
+
+            VStack(alignment: .center, spacing: 1) {
+                Text("In-Place Cap").font(.caption2).foregroundColor(.secondary)
+                Text(String(format: "%.1f%%", property.metrics.capRate)).font(.title3).fontWeight(.heavy)
+                    .foregroundColor(.teal)
+            }
+
+            Spacer()
+
+            VStack(alignment: .trailing, spacing: 1) {
+                Text("In-Place NOI").font(.caption2).foregroundColor(.secondary)
+                Text(formatCurrency(property.metrics.noi)).font(.title3).fontWeight(.heavy)
+            }
+        }
+        .padding(.vertical, 10)
+        .padding(.horizontal, 14)
+        .background(Color.scoutSecondaryBackground)
+        .cornerRadius(10)
+    }
+
+    private var secondaryChipsView: some View {
+        HStack(spacing: 8) {
+            metricChip(label: "Price/Unit", value: formatCurrency(property.metrics.pricePerUnit))
+            metricChip(label: "Price/SF", value: "$\(Int(property.metrics.pricePerSqFt))/sf")
+            metricChip(label: "Occupancy", value: "\(Int(property.metrics.occupancyRate))%")
+            if let units = property.metrics.unitCount {
+                metricChip(label: "Units", value: "\(units)")
+            }
+        }
+    }
+
+    private var actionButtonsView: some View {
+        HStack(spacing: 8) {
+            Button {
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                    isMortgageExpanded.toggle()
+                    ScoutHaptic.triggerLight()
+                }
+            } label: {
+                HStack(spacing: 4) {
+                    Image(systemName: isMortgageExpanded ? "chevron.up.circle.fill" : "slider.horizontal.3")
+                    Text(isMortgageExpanded ? "Hide Loan Model" : "Underwrite DSCR & Debt")
+                }
+                .font(.system(size: 11, weight: .bold))
+                .foregroundColor(.teal)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
+                .background(Color.teal.opacity(0.12))
+                .cornerRadius(8)
+            }
+
+            Button {
+                withAnimation(.spring()) {
+                    isParcelExpanded.toggle()
+                    if isParcelExpanded && parcelData == nil {
+                        Task {
+                            isLoadingParcel = true
+                            parcelData = await OpenParcelRegistryService.shared.fetchParcelRecord(
+                                for: property.id,
+                                city: property.city,
+                                state: property.state
+                            )
+                            isLoadingParcel = false
+                        }
+                    }
+                }
+            } label: {
+                HStack(spacing: 4) {
+                    Image(systemName: "map.fill")
+                    Text("GIS & Zoning")
+                }
+                .font(.system(size: 11, weight: .medium))
+                .foregroundColor(.primary)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
+                .background(Color.scoutSecondaryBackground)
+                .cornerRadius(8)
+            }
+
+            Button {
+                if let url = PDFExportService.shared.exportUnderwritingPDF(
+                    property: property,
+                    loanModel: loanCalculations,
+                    parcelData: parcelData
+                ) {
+                    self.exportedPDFURL = url
+                    self.isSharePresented = true
+                }
+            } label: {
+                HStack(spacing: 4) {
+                    Image(systemName: "doc.text.fill")
+                    Text("PDF Memo")
+                }
+                .font(.system(size: 11, weight: .medium))
+                .foregroundColor(.teal)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
+                .background(Color.teal.opacity(0.12))
+                .cornerRadius(8)
+            }
+
+            Spacer()
+
+            if let onRemove = onRemove {
+                Button(role: .destructive, action: onRemove) {
+                    Image(systemName: "trash")
+                        .font(.caption)
+                        .foregroundColor(.red.opacity(0.8))
+                }
+                .padding(6)
+            }
+        }
+    }
+
+    private var mortgageUnderwritingView: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Divider()
+
+            Text("Institutional Debt Underwriting & Sensitivity")
+                .font(.system(size: 12, weight: .bold))
+                .foregroundColor(.primary)
+
+            VStack(spacing: 8) {
+                sliderRow(label: "Down Payment", valueStr: "\(Int(downPaymentPct))%", value: $downPaymentPct, range: 10...50, step: 5)
+                sliderRow(label: "Interest Rate", valueStr: String(format: "%.2f%%", interestRate), value: $interestRate, range: 4.5...10.0, step: 0.25)
+                sliderRow(label: "Amortization", valueStr: "\(Int(amortYears)) Yrs", value: $amortYears, range: 15...30, step: 5)
+            }
+
+            HStack(spacing: 8) {
+                resultBox(
+                    title: "DSCR Ratio",
+                    value: String(format: "%.2fx", loanCalculations.dscr),
+                    color: loanCalculations.dscr >= 1.25 ? .green : (loanCalculations.dscr >= 1.0 ? .orange : .red),
+                    caption: loanCalculations.dscr >= 1.25 ? "Lender Bankable" : "High Default Risk"
+                )
+                resultBox(
+                    title: "Cash-on-Cash",
+                    value: String(format: "%.1f%%", loanCalculations.cashOnCash),
+                    color: .teal,
+                    caption: "Net Equity Yield"
+                )
+                resultBox(
+                    title: "Debt Yield",
+                    value: String(format: "%.1f%%", loanCalculations.debtYield),
+                    color: .primary,
+                    caption: "NOI / Loan Size"
+                )
+            }
+
+            HStack {
+                Text("Annual Debt Service:")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                Text(formatCurrency(loanCalculations.annualDebtService))
+                    .font(.caption2)
+                    .fontWeight(.bold)
+                Spacer()
+                Text("Loan Amount:")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                Text(formatCurrency(loanCalculations.loanAmount))
+                    .font(.caption2)
+                    .fontWeight(.bold)
+            }
+        }
+        .padding(12)
+        .background(Color.scoutSecondaryBackground)
+        .cornerRadius(10)
+        .transition(.opacity.combined(with: .move(edge: .top)))
+    }
+
+    private var parcelInspectorView: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Divider()
+            HStack {
+                Label("Municipal Tax Parcel & GIS Record", systemImage: "building.columns.fill")
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundColor(.primary)
+                Spacer()
+                if isLoadingParcel {
+                    ProgressView().scaleEffect(0.7)
+                }
+            }
+
+            if let p = parcelData {
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        Text("APN:").font(.caption2).foregroundColor(.secondary)
+                        Text(p.apn).font(.caption2).fontWeight(.mono)
+                        Spacer()
+                        Text("Zoning:").font(.caption2).foregroundColor(.secondary)
+                        Text(p.zoning).font(.caption2).fontWeight(.semibold)
+                    }
+                    HStack {
+                        Text("Assessed Value:").font(.caption2).foregroundColor(.secondary)
+                        Text(formatCurrency(p.totalAssessedValue)).font(.caption2).fontWeight(.semibold)
+                        Spacer()
+                        Text("Annual Property Tax:").font(.caption2).foregroundColor(.secondary)
+                        Text(formatCurrency(p.annualTax)).font(.caption2).fontWeight(.semibold)
+                    }
+                    HStack {
+                        Text("Flood Hazard:").font(.caption2).foregroundColor(.secondary)
+                        Text(p.floodZone).font(.caption2).foregroundColor(.green)
+                    }
+                }
+            }
+        }
+        .padding(10)
+        .background(Color.scoutSecondaryBackground)
+        .cornerRadius(8)
     }
 
     private func metricChip(label: String, value: String) -> some View {
