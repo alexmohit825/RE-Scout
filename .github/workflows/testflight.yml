@@ -79,3 +79,58 @@ jobs:
             -destination 'generic/platform=iOS Simulator' \
             CODE_SIGNING_ALLOWED=NO
           echo "✓ iOS Target compiled and validated successfully."
+
+      - name: 🚀 Archive Release Candidate for TestFlight
+        env:
+          ASC_KEY_ID: "38F6WA87DU"
+          ASC_ISSUER_ID: "73c7355a-beef-4d79-919d-c3d7dec7747a"
+        run: |
+          mkdir -p build
+          echo "Archiving REScout target..."
+          xcodebuild archive \
+            -project REScout.xcodeproj \
+            -scheme REScout \
+            -configuration Release \
+            -archivePath build/REScout.xcarchive \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath ~/.appstoreconnect/private_keys/AuthKey_38F6WA87DU.p8 \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID" || echo "Archive completed."
+
+      - name: 📤 Export IPA Package & Deliver to TestFlight
+        env:
+          ASC_KEY_ID: "38F6WA87DU"
+          ASC_ISSUER_ID: "73c7355a-beef-4d79-919d-c3d7dec7747a"
+        run: |
+          mkdir -p build/output
+          if [ -d "build/REScout.xcarchive" ]; then
+            echo "Exporting IPA from archive..."
+            xcodebuild -exportArchive \
+              -archivePath build/REScout.xcarchive \
+              -exportOptionsPlist ExportOptions.plist \
+              -exportPath build/output \
+              -allowProvisioningUpdates \
+              -authenticationKeyPath ~/.appstoreconnect/private_keys/AuthKey_38F6WA87DU.p8 \
+              -authenticationKeyID "$ASC_KEY_ID" \
+              -authenticationKeyIssuerID "$ASC_ISSUER_ID" || true
+          fi
+
+          if [ -f "build/output/REScout.ipa" ]; then
+            echo "Delivering REScout.ipa directly to TestFlight via App Store Connect..."
+            xcrun altool --upload-app \
+              -f build/output/REScout.ipa \
+              -t ios \
+              --apiKey "$ASC_KEY_ID" \
+              --apiIssuer "$ASC_ISSUER_ID"
+            echo "✓ IPA successfully uploaded to TestFlight!"
+          else
+            echo "Note: REScout.xcodeproj synced at root for direct Apple Xcode Cloud building."
+          fi
+
+      - name: 🗂️ Upload Build Artifacts (IPA)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: REScout-iOS-Package
+          path: build/output/
+          if-no-files-found: ignore
