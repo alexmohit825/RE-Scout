@@ -82,7 +82,7 @@ public struct ContentView: View {
                                 .font(.subheadline)
                         }
                         .padding(10)
-                        .background(Color(uiColor: .secondarySystemBackground))
+                        .background(Color.scoutSecondaryBackground)
                         .cornerRadius(10)
 
                         // Selected Property Quick Preview (if any)
@@ -181,7 +181,7 @@ public struct ContentView: View {
             }
             .padding(16)
         }
-        .background(Color(uiColor: .systemGroupedBackground))
+        .background(Color.scoutGroupedBackground)
     }
 
     // MARK: - 3. AI Terminal & NLP Ingestion Mode
@@ -208,7 +208,7 @@ public struct ContentView: View {
             }
             .padding(16)
         }
-        .background(Color(uiColor: .systemGroupedBackground))
+        .background(Color.scoutGroupedBackground)
     }
 
     // MARK: - 4. Full List Dossier Mode
@@ -226,7 +226,7 @@ public struct ContentView: View {
                             .font(.subheadline)
                     }
                     .padding(10)
-                    .background(Color(uiColor: .secondarySystemBackground))
+                    .background(Color.scoutSecondaryBackground)
                     .cornerRadius(10)
 
                     HStack {
@@ -238,7 +238,7 @@ public struct ContentView: View {
                         .pickerStyle(.menu)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
-                        .background(Color(uiColor: .secondarySystemBackground))
+                        .background(Color.scoutSecondaryBackground)
                         .cornerRadius(8)
 
                         Spacer()
@@ -267,7 +267,7 @@ public struct ContentView: View {
                         }
                         .frame(maxWidth: .infinity)
                         .padding(40)
-                        .background(Color(uiColor: .secondarySystemBackground))
+                        .background(Color.scoutSecondaryBackground)
                         .cornerRadius(12)
                     } else {
                         ForEach(viewModel.filteredProperties) { prop in
@@ -283,7 +283,7 @@ public struct ContentView: View {
             }
             .padding(16)
         }
-        .background(Color(uiColor: .systemGroupedBackground))
+        .background(Color.scoutGroupedBackground)
     }
 
     // MARK: - Shared Region Bar
@@ -303,7 +303,7 @@ public struct ContentView: View {
                         }
                         .padding(.horizontal, 12)
                         .padding(.vertical, 8)
-                        .background(viewModel.selectedRegion == region ? Color(red: 0.05, green: 0.35, blue: 0.32) : Color(uiColor: .secondarySystemBackground))
+                        .background(viewModel.selectedRegion == region ? Color(red: 0.05, green: 0.35, blue: 0.32) : Color.scoutSecondaryBackground)
                         .foregroundColor(viewModel.selectedRegion == region ? .white : .primary)
                         .cornerRadius(10)
                     }

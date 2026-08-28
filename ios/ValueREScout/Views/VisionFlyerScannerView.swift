@@ -81,7 +81,7 @@ public struct VisionFlyerScannerView: View {
                             .padding(.horizontal, 32)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(Color(uiColor: .systemGroupedBackground))
+                    .background(Color.scoutGroupedBackground)
                 }
 
                 // Bottom Captured Text HUD

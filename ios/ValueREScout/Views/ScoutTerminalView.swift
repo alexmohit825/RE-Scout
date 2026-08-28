@@ -82,7 +82,7 @@ public struct ScoutTerminalView: View {
                 TextEditor(text: $viewModel.scoutInputText)
                     .frame(height: 70)
                     .padding(8)
-                    .background(Color(uiColor: .secondarySystemBackground))
+                    .background(Color.scoutSecondaryBackground)
                     .cornerRadius(8)
                     .overlay(
                         RoundedRectangle(cornerRadius: 8)
@@ -146,7 +146,7 @@ public struct ScoutTerminalView: View {
                                     .foregroundColor(.primary)
                                     .padding(.horizontal, 8)
                                     .padding(.vertical, 4)
-                                    .background(Color(uiColor: .tertiarySystemBackground))
+                                    .background(Color.scoutTertiaryBackground)
                                     .cornerRadius(6)
                                     .overlay(
                                         RoundedRectangle(cornerRadius: 6)
@@ -176,7 +176,7 @@ public struct ScoutTerminalView: View {
             VisionFlyerScannerView(viewModel: viewModel)
         }
         .padding(16)
-        .background(Color(uiColor: .systemBackground))
+        .background(Color.scoutBackground)
         .cornerRadius(14)
         .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
         .overlay(

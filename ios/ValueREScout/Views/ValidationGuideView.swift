@@ -19,7 +19,7 @@ public struct ValidationGuideView: View {
                                 .foregroundColor(selectedTab == index ? .white : .primary)
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 6)
-                                .background(selectedTab == index ? Color(red: 0.05, green: 0.35, blue: 0.32) : Color(uiColor: .secondarySystemBackground))
+                                .background(selectedTab == index ? Color(red: 0.05, green: 0.35, blue: 0.32) : Color.scoutSecondaryBackground)
                                 .cornerRadius(8)
                         }
                     }
@@ -42,11 +42,11 @@ public struct ValidationGuideView: View {
                 }
             }
             .padding(12)
-            .background(Color(uiColor: .secondarySystemBackground))
+            .background(Color.scoutSecondaryBackground)
             .cornerRadius(10)
         }
         .padding(16)
-        .background(Color(uiColor: .systemBackground))
+        .background(Color.scoutBackground)
         .cornerRadius(14)
         .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
         .overlay(
@@ -64,7 +64,7 @@ public struct ValidationGuideView: View {
             Text("Value Score = (Cap Rate Yield × 50%) + (Price Discount Factor × 30%) + (Occupancy Health × 20%)")
                 .font(.system(size: 11, design: .monospaced))
                 .padding(8)
-                .background(Color(uiColor: .tertiarySystemBackground))
+                .background(Color.scoutTertiaryBackground)
                 .cornerRadius(6)
 
             Text("Assets with scores ≥70 provide superior risk-adjusted cash-on-cash margins and robust debt service coverage (DSCR > 1.30x).")

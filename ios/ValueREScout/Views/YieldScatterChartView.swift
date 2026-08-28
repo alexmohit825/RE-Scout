@@ -80,11 +80,11 @@ public struct YieldScatterChartView: View {
                     .foregroundColor(.secondary)
             }
             .padding(8)
-            .background(Color(uiColor: .secondarySystemBackground))
+            .background(Color.scoutSecondaryBackground)
             .cornerRadius(8)
         }
         .padding(16)
-        .background(Color(uiColor: .systemBackground))
+        .background(Color.scoutBackground)
         .cornerRadius(14)
         .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
         .overlay(

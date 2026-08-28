@@ -15,8 +15,6 @@ public struct PropertyCardView: View {
     @State private var exportedPDFURL: URL? = nil
     @State private var isSharePresented: Bool = false
 
-    private let haptic = UIImpactFeedbackGenerator(style: .light)
-
     public init(property: Property, onRemove: (() -> Void)? = nil) {
         self.property = property
         self.onRemove = onRemove
@@ -108,7 +106,7 @@ public struct PropertyCardView: View {
             }
             .padding(.vertical, 10)
             .padding(.horizontal, 14)
-            .background(Color(uiColor: .secondarySystemBackground))
+            .background(Color.scoutSecondaryBackground)
             .cornerRadius(10)
 
             // Secondary Metric Chips
@@ -134,7 +132,7 @@ public struct PropertyCardView: View {
                 Button {
                     withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
                         isMortgageExpanded.toggle()
-                        haptic.impactOccurred()
+                        ScoutHaptic.triggerLight()
                     }
                 } label: {
                     HStack(spacing: 4) {
@@ -174,7 +172,7 @@ public struct PropertyCardView: View {
                     .foregroundColor(.primary)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 6)
-                    .background(Color(uiColor: .secondarySystemBackground))
+                    .background(Color.scoutSecondaryBackground)
                     .cornerRadius(8)
                 }
 
@@ -274,7 +272,7 @@ public struct PropertyCardView: View {
                     }
                 }
                 .padding(12)
-                .background(Color(uiColor: .secondarySystemBackground))
+                .background(Color.scoutSecondaryBackground)
                 .cornerRadius(10)
                 .transition(.opacity.combined(with: .move(edge: .top)))
             }
@@ -317,12 +315,12 @@ public struct PropertyCardView: View {
                     }
                 }
                 .padding(10)
-                .background(Color(uiColor: .secondarySystemBackground))
+                .background(Color.scoutSecondaryBackground)
                 .cornerRadius(8)
             }
         }
         .padding(16)
-        .background(Color(uiColor: .systemBackground))
+        .background(Color.scoutBackground)
         .cornerRadius(14)
         .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
         .overlay(
@@ -338,7 +336,7 @@ public struct PropertyCardView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 5)
-        .background(Color(uiColor: .secondarySystemBackground))
+        .background(Color.scoutSecondaryBackground)
         .cornerRadius(6)
     }
 
@@ -359,7 +357,7 @@ public struct PropertyCardView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(6)
-        .background(Color(uiColor: .tertiarySystemBackground))
+        .background(Color.scoutTertiaryBackground)
         .cornerRadius(6)
     }
 

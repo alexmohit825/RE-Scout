@@ -81,7 +81,7 @@ public struct PropertyDossierPDFView: View {
                 .cornerRadius(8)
             }
             .padding(12)
-            .background(Color(uiColor: .secondarySystemBackground))
+            .background(Color.scoutSecondaryBackground)
             .cornerRadius(8)
 
             // Valuation & Core Financial Metrics Grid
@@ -108,7 +108,7 @@ public struct PropertyDossierPDFView: View {
                     }
                 }
                 .padding(10)
-                .background(Color(uiColor: .secondarySystemBackground).opacity(0.5))
+                .background(Color.scoutSecondaryBackground.opacity(0.5))
                 .cornerRadius(8)
             }
 
@@ -131,7 +131,7 @@ public struct PropertyDossierPDFView: View {
                     }
                 }
                 .padding(10)
-                .background(Color(uiColor: .secondarySystemBackground).opacity(0.5))
+                .background(Color.scoutSecondaryBackground.opacity(0.5))
                 .cornerRadius(8)
             }
 
@@ -155,7 +155,7 @@ public struct PropertyDossierPDFView: View {
                         }
                     }
                     .padding(10)
-                    .background(Color(uiColor: .secondarySystemBackground).opacity(0.5))
+                    .background(Color.scoutSecondaryBackground.opacity(0.5))
                     .cornerRadius(8)
                 }
             }
@@ -170,7 +170,7 @@ public struct PropertyDossierPDFView: View {
                         .foregroundColor(.secondary)
                         .padding(8)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(Color(uiColor: .secondarySystemBackground).opacity(0.5))
+                        .background(Color.scoutSecondaryBackground.opacity(0.5))
                         .cornerRadius(6)
                 }
             }
