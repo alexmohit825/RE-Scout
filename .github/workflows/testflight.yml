@@ -18,7 +18,7 @@ permissions:
 jobs:
   build-and-deploy:
     name: 🍏 Compile, Archive & Deliver to TestFlight
-    runs-on: macos-14
+    runs-on: macos-15
     timeout-minutes: 45
 
     steps:
@@ -27,11 +27,11 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 🛠️ Select Xcode 15.4 / 16.0
+      - name: 🛠️ Select Xcode 16.0
         run: |
           echo "Available Xcode installations:"
           ls -d /Applications/Xcode*.app
-          sudo xcode-select -s /Applications/Xcode_15.4.app || sudo xcode-select -s /Applications/Xcode.app
+          sudo xcode-select -s /Applications/Xcode_16.0.app || sudo xcode-select -s /Applications/Xcode_16.app || sudo xcode-select -s /Applications/Xcode.app
           xcodebuild -version
           swift --version
 
