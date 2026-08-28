@@ -1,0 +1,6 @@
+{
+  "name": "Value RE Scout",
+  "description": "Multi-Unit & Industrial Real Estate Yield Underwriter with Live AI Search Integration and PWA Support.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
