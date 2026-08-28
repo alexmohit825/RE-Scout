@@ -1,7 +1,7 @@
 import SwiftUI
 
 public struct ScoutTerminalView: View {
-    @ObservedObject var viewModel: ScoutViewModel
+    @Bindable var viewModel: ScoutViewModel
 
     private let sampleQueries = [
         "3110 Judson St, Gig Harbor, WA",
@@ -46,6 +46,35 @@ public struct ScoutTerminalView: View {
                 .padding(.vertical, 3)
                 .background(Color.green.opacity(0.1))
                 .cornerRadius(6)
+            }
+
+            // Live Camera OCR Scanner Action Bar
+            HStack {
+                Button {
+                    viewModel.isScannerPresented = true
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "camera.viewfinder")
+                            .font(.system(size: 13, weight: .bold))
+                        Text("Live OCR Flyer Scanner")
+                            .font(.system(size: 11, weight: .bold))
+                    }
+                    .foregroundColor(.teal)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(Color.teal.opacity(0.12))
+                    .cornerRadius(8)
+                }
+
+                Spacer()
+
+                if !viewModel.scoutInputText.isEmpty {
+                    Button("Clear") {
+                        viewModel.scoutInputText = ""
+                    }
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                }
             }
 
             // Input Text Area
@@ -142,6 +171,9 @@ public struct ScoutTerminalView: View {
                 .background(Color.orange.opacity(0.1))
                 .cornerRadius(6)
             }
+        }
+        .sheet(isPresented: $viewModel.isScannerPresented) {
+            VisionFlyerScannerView(viewModel: viewModel)
         }
         .padding(16)
         .background(Color(uiColor: .systemBackground))

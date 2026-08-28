@@ -29,7 +29,9 @@ public enum PropertyData {
             ),
             sqft: 5_918,
             yearBuilt: 1988,
-            description: "8-Unit harbor view multi-family asset with full historical occupancy."
+            description: "8-Unit harbor view multi-family asset with full historical occupancy.",
+            latitude: 47.3293,
+            longitude: -122.5801
         ),
         Property(
             id: "pnw-2",
@@ -58,7 +60,9 @@ public enum PropertyData {
             ),
             sqft: 13_440,
             yearBuilt: 1999,
-            description: "Prime Eastside light industrial facility with grade-level roll-up bays."
+            description: "Prime Eastside light industrial facility with grade-level roll-up bays.",
+            latitude: 47.5412,
+            longitude: -122.0520
         ),
         Property(
             id: "pnw-3",
@@ -87,7 +91,9 @@ public enum PropertyData {
             ),
             sqft: 14_772,
             yearBuilt: 1994,
-            description: "16-Unit garden style multi-family community with stable in-place cash flow."
+            description: "16-Unit garden style multi-family community with stable in-place cash flow.",
+            latitude: 45.5035,
+            longitude: -122.7667
         ),
         Property(
             id: "sw-1",
@@ -116,7 +122,9 @@ public enum PropertyData {
             ),
             sqft: 16_550,
             yearBuilt: 2002,
-            description: "Distribution warehouse with dual dock-high doors in Phoenix logistics corridor."
+            description: "Distribution warehouse with dual dock-high doors in Phoenix logistics corridor.",
+            latitude: 33.4658,
+            longitude: -112.0298
         ),
         Property(
             id: "mw-1",
@@ -145,7 +153,9 @@ public enum PropertyData {
             ),
             sqft: 10_570,
             yearBuilt: 1978,
-            description: "12-Unit brick multi-family with high cap rate and value-add rent bump upside."
+            description: "12-Unit brick multi-family with high cap rate and value-add rent bump upside.",
+            latitude: 41.8914,
+            longitude: -87.6658
         )
     ]
 }

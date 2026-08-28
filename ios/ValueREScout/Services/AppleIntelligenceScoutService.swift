@@ -78,6 +78,9 @@ public final class AppleIntelligenceScoutService: Sendable {
             interestRate: 6.5
         )
 
+        // Asynchronous Geocoding Resolution for spatial MapKit placement
+        let geocoded = await GeocodingService.shared.geocode(address: address, city: city, state: state)
+
         return Property(
             id: id,
             address: address,
@@ -92,7 +95,9 @@ public final class AppleIntelligenceScoutService: Sendable {
             sqft: sqft,
             yearBuilt: extracted.yearBuilt ?? 2004,
             description: extracted.summary ?? "Underwritten on-device via Apple Intelligence NLP Parser.",
-            source: "Apple Intelligence On-Device"
+            source: "Apple Intelligence On-Device",
+            latitude: geocoded?.latitude,
+            longitude: geocoded?.longitude
         )
     }
 

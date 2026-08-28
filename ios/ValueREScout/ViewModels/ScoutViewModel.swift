@@ -1,8 +1,9 @@
 import Foundation
 import SwiftUI
-import Combine
+import Observation
+import MapKit
 
-public enum SortField: String, CaseIterable, Identifiable {
+public enum SortField: String, CaseIterable, Identifiable, Sendable {
     case valueScore = "Best Value Score"
     case capRate = "Highest Cap Rate"
     case pricePerUnit = "Lowest $/Unit"
@@ -12,21 +13,43 @@ public enum SortField: String, CaseIterable, Identifiable {
     public var id: String { rawValue }
 }
 
+public enum AppDisplayMode: String, CaseIterable, Identifiable, Sendable {
+    case map = "Map HUD"
+    case scatter = "Yield Matrix"
+    case terminal = "AI Terminal"
+    case list = "List Dossier"
+
+    public var id: String { rawValue }
+    public var icon: String {
+        switch self {
+        case .map: return "map.fill"
+        case .scatter: return "chart.dots.scatter"
+        case .terminal: return "sparkles"
+        case .list: return "list.bullet.rectangle.portrait.fill"
+        }
+    }
+}
+
+@Observable
 @MainActor
-public final class ScoutViewModel: ObservableObject {
-    @Published public var properties: [Property] = PropertyData.initialProperties
-    @Published public var customProperties: [Property] = []
-    @Published public var selectedRegion: RegionId = .pnw
-    @Published public var showResidential: Bool = false
-    @Published public var searchQuery: String = ""
-    @Published public var sortBy: SortField = .valueScore
+public final class ScoutViewModel {
+    public var properties: [Property] = PropertyData.initialProperties
+    public var customProperties: [Property] = []
+    public var selectedRegion: RegionId = .pnw
+    public var showResidential: Bool = false
+    public var searchQuery: String = ""
+    public var sortBy: SortField = .valueScore
+    public var displayMode: AppDisplayMode = .map
+    public var selectedProperty: Property?
+    public var isScannerPresented: Bool = false
     
     // Apple Intelligence Scout State
-    @Published public var scoutInputText: String = ""
-    @Published public var isScouting: Bool = false
-    @Published public var scoutError: String?
-    @Published public var lastScoutedProperty: Property?
+    public var scoutInputText: String = ""
+    public var isScouting: Bool = false
+    public var scoutError: String?
+    public var lastScoutedProperty: Property?
     
+    @ObservationIgnored
     private let scoutService = AppleIntelligenceScoutService.shared
 
     public init() {
@@ -88,6 +111,7 @@ public final class ScoutViewModel: ObservableObject {
             let property = try await scoutService.scoutProperty(input: input)
             self.lastScoutedProperty = property
             self.addProperty(property)
+            self.selectedProperty = property
             self.scoutInputText = ""
         } catch {
             self.scoutError = error.localizedDescription
@@ -99,11 +123,15 @@ public final class ScoutViewModel: ObservableObject {
     public func addProperty(_ property: Property) {
         customProperties.insert(property, at: 0)
         selectedRegion = property.region
+        selectedProperty = property
         saveCustomProperties()
     }
 
     public func removeProperty(id: String) {
         customProperties.removeAll { $0.id == id }
+        if selectedProperty?.id == id {
+            selectedProperty = nil
+        }
         saveCustomProperties()
     }
 

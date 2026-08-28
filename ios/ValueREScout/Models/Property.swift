@@ -1,4 +1,5 @@
 import Foundation
+import CoreLocation
 
 public enum RegionId: String, Codable, CaseIterable, Identifiable, Sendable {
     case pnw = "pnw"
@@ -149,6 +150,13 @@ public struct Property: Identifiable, Codable, Hashable, Sendable {
     public var yearBuilt: Int?
     public var description: String?
     public var source: String?
+    public var latitude: Double?
+    public var longitude: Double?
+
+    public var coordinate: CLLocationCoordinate2D? {
+        guard let lat = latitude, let lon = longitude else { return nil }
+        return CLLocationCoordinate2D(latitude: lat, longitude: lon)
+    }
 
     public init(
         id: String,
@@ -164,7 +172,9 @@ public struct Property: Identifiable, Codable, Hashable, Sendable {
         sqft: Int? = nil,
         yearBuilt: Int? = nil,
         description: String? = nil,
-        source: String? = nil
+        source: String? = nil,
+        latitude: Double? = nil,
+        longitude: Double? = nil
     ) {
         self.id = id
         self.address = address
@@ -180,5 +190,7 @@ public struct Property: Identifiable, Codable, Hashable, Sendable {
         self.yearBuilt = yearBuilt
         self.description = description
         self.source = source
+        self.latitude = latitude
+        self.longitude = longitude
     }
 }

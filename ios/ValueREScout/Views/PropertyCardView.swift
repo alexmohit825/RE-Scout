@@ -12,6 +12,8 @@ public struct PropertyCardView: View {
     @State private var amortYears: Double = 30.0
     @State private var parcelData: OpenParcelRegistryService.ParcelRecord? = nil
     @State private var isLoadingParcel: Bool = false
+    @State private var exportedPDFURL: URL? = nil
+    @State private var isSharePresented: Bool = false
 
     private let haptic = UIImpactFeedbackGenerator(style: .light)
 
@@ -176,6 +178,29 @@ public struct PropertyCardView: View {
                     .cornerRadius(8)
                 }
 
+                // Export 1-Page PDF Tear Sheet
+                Button {
+                    if let url = PDFExportService.shared.exportUnderwritingPDF(
+                        property: property,
+                        loanModel: loanCalculations,
+                        parcelData: parcelData
+                    ) {
+                        self.exportedPDFURL = url
+                        self.isSharePresented = true
+                    }
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "doc.text.fill")
+                        Text("PDF Memo")
+                    }
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(.teal)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(Color.teal.opacity(0.12))
+                    .cornerRadius(8)
+                }
+
                 Spacer()
 
                 // Remove Button (if custom)
@@ -186,6 +211,11 @@ public struct PropertyCardView: View {
                             .foregroundColor(.red.opacity(0.8))
                     }
                     .padding(6)
+                }
+            }
+            .sheet(isPresented: $isSharePresented) {
+                if let url = exportedPDFURL {
+                    ShareSheetRepresentable(activityItems: [url])
                 }
             }
 
@@ -346,3 +376,21 @@ public struct PropertyCardView: View {
         return String(format: "$%.0fk", val / 1_000)
     }
 }
+
+#if os(iOS)
+public struct ShareSheetRepresentable: UIViewControllerRepresentable {
+    public let activityItems: [Any]
+    public var applicationActivities: [UIActivity]? = nil
+
+    public func makeUIViewController(context: Context) -> UIActivityViewController {
+        UIActivityViewController(activityItems: activityItems, applicationActivities: applicationActivities)
+    }
+
+    public func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
+}
+#else
+public struct ShareSheetRepresentable: View {
+    public let activityItems: [Any]
+    public var body: some View { Text("Sharing available on iOS.") }
+}
+#endif
