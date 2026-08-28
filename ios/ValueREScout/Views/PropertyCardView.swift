@@ -320,7 +320,7 @@ public struct PropertyCardView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     HStack {
                         Text("APN:").font(.caption2).foregroundColor(.secondary)
-                        Text(p.apn).font(.caption2).fontWeight(.mono)
+                        Text(p.apn).font(.system(.caption2, design: .monospaced)).fontWeight(.semibold)
                         Spacer()
                         Text("Zoning:").font(.caption2).foregroundColor(.secondary)
                         Text(p.zoning).font(.caption2).fontWeight(.semibold)

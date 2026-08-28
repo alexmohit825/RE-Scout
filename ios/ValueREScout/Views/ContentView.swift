@@ -24,8 +24,9 @@ public struct ContentView: View {
                     }
                 }
             }
-            .navigationBarTitleDisplayMode(.inline)
+            .scoutInlineNavigationBar()
             .toolbar {
+                #if os(iOS)
                 ToolbarItem(placement: .topBarLeading) {
                     HStack(spacing: 6) {
                         Image(systemName: "building.2.crop.circle.fill")
@@ -55,6 +56,37 @@ public struct ContentView: View {
                             .foregroundColor(.teal)
                     }
                 }
+                #else
+                ToolbarItem(placement: .navigation) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "building.2.crop.circle.fill")
+                            .foregroundColor(.teal)
+                        Text("RE Scout")
+                            .font(.headline)
+                            .fontWeight(.black)
+                    }
+                }
+
+                ToolbarItem(placement: .automatic) {
+                    Picker("Mode", selection: $viewModel.displayMode) {
+                        ForEach(AppDisplayMode.allCases) { mode in
+                            Label(mode.rawValue, systemImage: mode.icon).tag(mode)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    .frame(maxWidth: 220)
+                }
+
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
+                        viewModel.isScannerPresented = true
+                    } label: {
+                        Image(systemName: "camera.viewfinder")
+                            .font(.subheadline)
+                            .foregroundColor(.teal)
+                    }
+                }
+                #endif
             }
             .sheet(isPresented: $viewModel.isScannerPresented) {
                 VisionFlyerScannerView(viewModel: viewModel)
@@ -142,12 +174,9 @@ public struct ContentView: View {
                     .padding(16)
                 }
                 .navigationTitle("Field Scout Dossier")
-                .navigationBarTitleDisplayMode(.inline)
+                .scoutInlineNavigationBar()
             }
-            .presentationDetents([.fraction(0.15), .medium, .large])
-            .presentationDragIndicator(.visible)
-            .presentationBackgroundInteraction(.enabled)
-            .interactiveDismissDisabled(true)
+            .scoutSheetDetents()
         }
     }
 

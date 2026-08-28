@@ -63,3 +63,31 @@ public enum ScoutHaptic {
         #endif
     }
 }
+
+public extension View {
+    @ViewBuilder
+    func scoutInlineNavigationBar() -> some View {
+        #if os(iOS)
+        self.navigationBarTitleDisplayMode(.inline)
+        #else
+        self
+        #endif
+    }
+
+    @ViewBuilder
+    func scoutSheetDetents() -> some View {
+        #if os(iOS)
+        self
+            .presentationDetents([.fraction(0.15), .medium, .large])
+            .presentationDragIndicator(.visible)
+            .presentationBackgroundInteraction(.enabled)
+            .interactiveDismissDisabled(true)
+        #else
+        self
+            .presentationDetents([.fraction(0.15), .medium, .large])
+            .presentationDragIndicator(.visible)
+            .interactiveDismissDisabled(true)
+        #endif
+    }
+}
+

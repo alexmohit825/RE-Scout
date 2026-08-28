@@ -137,7 +137,7 @@ public struct VisionFlyerScannerView: View {
                 }
             }
             .navigationTitle("Scout Scanner")
-            .navigationBarTitleDisplayMode(.inline)
+            .scoutInlineNavigationBar()
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("Done") {
@@ -165,7 +165,7 @@ public struct VisionFlyerScannerView: View {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard trimmed.count > 10 else { return }
 
-        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        ScoutHaptic.triggerMedium()
         withAnimation(.spring()) {
             if scannedTextSnippet.isEmpty {
                 scannedTextSnippet = trimmed
