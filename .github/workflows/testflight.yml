@@ -114,14 +114,22 @@ jobs:
             -authenticationKeyID "$ASC_KEY_ID" \
             -authenticationKeyIssuerID "$ASC_ISSUER_ID"
 
-          if [ -f "build/output/REScout.ipa" ]; then
-            echo "Delivering REScout.ipa directly to TestFlight via App Store Connect..."
+          echo "Exported files in build/output:"
+          ls -la build/output
+
+          IPA_PATH=$(find build/output -name "*.ipa" | head -n 1)
+          if [ -n "$IPA_PATH" ]; then
+            echo "Delivering $IPA_PATH directly to TestFlight via App Store Connect..."
             xcrun altool --upload-app \
-              -f build/output/REScout.ipa \
+              -f "$IPA_PATH" \
               -t ios \
               --apiKey "$ASC_KEY_ID" \
-              --apiIssuer "$ASC_ISSUER_ID"
-            echo "✓ IPA successfully uploaded to TestFlight!"
+              --apiIssuer "$ASC_ISSUER_ID" \
+              --show-progress
+            echo "✓ IPA successfully uploaded and verified with Apple TestFlight!"
+          else
+            echo "ERROR: No .ipa file found in build/output."
+            exit 1
           fi
 
       - name: 🗂️ Upload Build Artifacts (IPA)
