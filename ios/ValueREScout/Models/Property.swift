@@ -1,6 +1,39 @@
 import Foundation
 import CoreLocation
 
+public enum RegionFilter: String, Codable, CaseIterable, Identifiable, Sendable {
+    case all = "all"
+    case pnw = "pnw"
+    case southwest = "southwest"
+    case midwest = "midwest"
+    case southeast = "southeast"
+    case northeast = "northeast"
+
+    public var id: String { rawValue }
+
+    public var label: String {
+        switch self {
+        case .all: return "All Regions"
+        case .pnw: return "Pacific Northwest"
+        case .southwest: return "Southwest"
+        case .midwest: return "Midwest"
+        case .southeast: return "Southeast"
+        case .northeast: return "Northeast"
+        }
+    }
+
+    public var subtitle: String {
+        switch self {
+        case .all: return "Nationwide Portfolio"
+        case .pnw: return "WA, OR"
+        case .southwest: return "CA, AZ, NV, CO, UT"
+        case .midwest: return "IL, IN, OH, MI, MN"
+        case .southeast: return "FL, GA, NC, TN, SC"
+        case .northeast: return "NY, PA, MA, DC, MD"
+        }
+    }
+}
+
 public enum RegionId: String, Codable, CaseIterable, Identifiable, Sendable {
     case pnw = "pnw"
     case southwest = "southwest"

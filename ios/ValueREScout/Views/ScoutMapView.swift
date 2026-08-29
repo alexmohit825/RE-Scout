@@ -111,32 +111,37 @@ public struct ScoutMapView: View {
         }
     }
 
-    private func regionFor(_ region: RegionId) -> MKCoordinateRegion {
+    private func regionFor(_ region: RegionFilter) -> MKCoordinateRegion {
         switch region {
+        case .all:
+            return MKCoordinateRegion(
+                center: CLLocationCoordinate2D(latitude: 39.8283, longitude: -98.5795),
+                span: MKCoordinateSpan(latitudeDelta: 28.0, longitudeDelta: 45.0)
+            )
         case .pnw:
             return MKCoordinateRegion(
                 center: CLLocationCoordinate2D(latitude: 47.1, longitude: -122.4),
-                span: MKCoordinateSpan(latitudeDelta: 2.5, longitudeDelta: 2.5)
+                span: MKCoordinateSpan(latitudeDelta: 3.5, longitudeDelta: 4.5)
             )
         case .southwest:
             return MKCoordinateRegion(
-                center: CLLocationCoordinate2D(latitude: 33.5, longitude: -112.1),
-                span: MKCoordinateSpan(latitudeDelta: 3.0, longitudeDelta: 3.0)
+                center: CLLocationCoordinate2D(latitude: 34.05, longitude: -115.0),
+                span: MKCoordinateSpan(latitudeDelta: 8.0, longitudeDelta: 9.0)
             )
         case .midwest:
             return MKCoordinateRegion(
-                center: CLLocationCoordinate2D(latitude: 41.9, longitude: -87.7),
-                span: MKCoordinateSpan(latitudeDelta: 2.5, longitudeDelta: 2.5)
+                center: CLLocationCoordinate2D(latitude: 41.88, longitude: -87.63),
+                span: MKCoordinateSpan(latitudeDelta: 6.0, longitudeDelta: 7.0)
             )
         case .southeast:
             return MKCoordinateRegion(
-                center: CLLocationCoordinate2D(latitude: 33.7, longitude: -84.4),
-                span: MKCoordinateSpan(latitudeDelta: 3.5, longitudeDelta: 3.5)
+                center: CLLocationCoordinate2D(latitude: 30.5, longitude: -84.0),
+                span: MKCoordinateSpan(latitudeDelta: 9.0, longitudeDelta: 10.0)
             )
         case .northeast:
             return MKCoordinateRegion(
-                center: CLLocationCoordinate2D(latitude: 40.7, longitude: -74.0),
-                span: MKCoordinateSpan(latitudeDelta: 2.5, longitudeDelta: 2.5)
+                center: CLLocationCoordinate2D(latitude: 41.0, longitude: -74.0),
+                span: MKCoordinateSpan(latitudeDelta: 5.0, longitudeDelta: 6.0)
             )
         }
     }

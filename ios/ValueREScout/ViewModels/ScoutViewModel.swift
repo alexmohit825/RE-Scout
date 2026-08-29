@@ -35,7 +35,8 @@ public enum AppDisplayMode: String, CaseIterable, Identifiable, Sendable {
 public final class ScoutViewModel {
     public var properties: [Property] = PropertyData.initialProperties
     public var customProperties: [Property] = []
-    public var selectedRegion: RegionId = .pnw
+    public var selectedRegion: RegionFilter = .all
+    public var minValueScore: Double = 0.0
     public var showResidential: Bool = false
     public var searchQuery: String = ""
     public var sortBy: SortField = .valueScore
@@ -43,7 +44,7 @@ public final class ScoutViewModel {
     public var selectedProperty: Property?
     public var isScannerPresented: Bool = false
     
-    // Apple Intelligence Scout State
+    // Scout State
     public var scoutInputText: String = ""
     public var isScouting: Bool = false
     public var scoutError: String?
@@ -59,17 +60,24 @@ public final class ScoutViewModel {
     public var filteredProperties: [Property] {
         let combined = customProperties + properties
         return combined.filter { property in
-            // Region filter
-            let regionMatch = property.region == selectedRegion || selectedRegion.states.contains(property.state.uppercased())
-            guard regionMatch else { return false }
+            // 1. Minimum Value Score Filter
+            guard Double(property.valueScore) >= minValueScore else {
+                return false
+            }
 
-            // Residential filter
+            // 2. Region Filter
+            if selectedRegion != .all {
+                let regionMatch = property.region.rawValue == selectedRegion.rawValue
+                guard regionMatch else { return false }
+            }
+
+            // 3. Residential Filter
             let isRes = ["single_family", "duplex_triplex", "townhome"].contains(property.type)
             if isRes && !showResidential {
                 return false
             }
 
-            // Search query
+            // 4. Search Query
             if !searchQuery.trimmingCharacters(in: .whitespaces).isEmpty {
                 let q = searchQuery.lowercased()
                 let addrMatch = property.address.lowercased().contains(q)

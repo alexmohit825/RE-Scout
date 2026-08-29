@@ -4,6 +4,7 @@ import SwiftUI
 public struct ContentView: View {
     @State private var viewModel = ScoutViewModel()
     @State private var isMapSheetPresented: Bool = true
+    @State private var showFiltersSheet: Bool = false
 
     public init() {}
 
@@ -31,7 +32,7 @@ public struct ContentView: View {
                     HStack(spacing: 6) {
                         Image(systemName: "building.2.crop.circle.fill")
                             .foregroundColor(.teal)
-                        Text("RE Scout")
+                        Text("RE Scout Pro")
                             .font(.headline)
                             .fontWeight(.black)
                     }
@@ -61,7 +62,7 @@ public struct ContentView: View {
                     HStack(spacing: 6) {
                         Image(systemName: "building.2.crop.circle.fill")
                             .foregroundColor(.teal)
-                        Text("RE Scout")
+                        Text("RE Scout Pro")
                             .font(.headline)
                             .fontWeight(.black)
                     }
@@ -107,16 +108,8 @@ public struct ContentView: View {
                         // Region Pill Selector
                         regionBar
 
-                        // Search Bar
-                        HStack {
-                            Image(systemName: "magnifyingglass")
-                                .foregroundColor(.secondary)
-                            TextField("Search address, city, state...", text: $viewModel.searchQuery)
-                                .font(.subheadline)
-                        }
-                        .padding(10)
-                        .background(Color.scoutSecondaryBackground)
-                        .cornerRadius(10)
+                        // Value Score Potential Slider & Search
+                        scoreAndSearchControlBar
 
                         // Selected Property Quick Preview (if any)
                         if let selected = viewModel.selectedProperty {
@@ -186,6 +179,8 @@ public struct ContentView: View {
             VStack(spacing: 16) {
                 regionBar
 
+                scoreAndSearchControlBar
+
                 YieldScatterChartView(
                     properties: viewModel.filteredProperties,
                     regionLabel: viewModel.selectedRegion.label
@@ -249,35 +244,7 @@ public struct ContentView: View {
                 VStack(spacing: 10) {
                     regionBar
 
-                    HStack {
-                        Image(systemName: "magnifyingglass")
-                            .foregroundColor(.secondary)
-                        TextField("Search address, city, state...", text: $viewModel.searchQuery)
-                            .font(.subheadline)
-                    }
-                    .padding(10)
-                    .background(Color.scoutSecondaryBackground)
-                    .cornerRadius(10)
-
-                    HStack {
-                        Picker("Sort By", selection: $viewModel.sortBy) {
-                            ForEach(SortField.allCases) { opt in
-                                Text(opt.rawValue).tag(opt)
-                            }
-                        }
-                        .pickerStyle(.menu)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Color.scoutSecondaryBackground)
-                        .cornerRadius(8)
-
-                        Spacer()
-
-                        Toggle("Residential", isOn: $viewModel.showResidential)
-                            .font(.caption)
-                            .toggleStyle(.button)
-                            .tint(Color(red: 0.05, green: 0.35, blue: 0.32))
-                    }
+                    scoreAndSearchControlBar
                 }
 
                 // Property List
@@ -316,18 +283,112 @@ public struct ContentView: View {
         .background(Color.scoutGroupedBackground)
     }
 
-    // MARK: - Shared Region Bar
+    // MARK: - Shared Controls: Score Slider, Search & Residential Toggle
+    private var scoreAndSearchControlBar: some View {
+        VStack(spacing: 10) {
+            // Search Input
+            HStack {
+                Image(systemName: "magnifyingglass")
+                    .foregroundColor(.secondary)
+                TextField("Search address, city, state...", text: $viewModel.searchQuery)
+                    .font(.subheadline)
+                if !viewModel.searchQuery.isEmpty {
+                    Button {
+                        viewModel.searchQuery = ""
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+            .padding(10)
+            .background(Color.scoutSecondaryBackground)
+            .cornerRadius(10)
+
+            // Minimum Value Score Potential Slider
+            VStack(alignment: .leading, spacing: 6) {
+                HStack {
+                    Label {
+                        Text("Min Value Score:")
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                    } icon: {
+                        Image(systemName: "chart.line.uptrend.xyaxis")
+                            .foregroundColor(.teal)
+                    }
+
+                    Text(viewModel.minValueScore > 0 ? "\(Int(viewModel.minValueScore))+" : "All Scores")
+                        .font(.caption)
+                        .fontWeight(.bold)
+                        .foregroundColor(viewModel.minValueScore >= 70 ? .green : (viewModel.minValueScore >= 50 ? .orange : .secondary))
+
+                    Spacer()
+
+                    // Quick Score Presets
+                    HStack(spacing: 4) {
+                        scorePresetButton(title: "All", score: 0)
+                        scorePresetButton(title: "70+", score: 70)
+                        scorePresetButton(title: "80+", score: 80)
+                    }
+                }
+
+                Slider(value: $viewModel.minValueScore, in: 0...90, step: 5)
+                    .tint(.teal)
+            }
+            .padding(10)
+            .background(Color.scoutSecondaryBackground)
+            .cornerRadius(10)
+
+            // Secondary Toggles: Residential & Sort
+            HStack {
+                Picker("Sort By", selection: $viewModel.sortBy) {
+                    ForEach(SortField.allCases) { opt in
+                        Text(opt.rawValue).tag(opt)
+                    }
+                }
+                .pickerStyle(.menu)
+                .font(.caption)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(Color.scoutSecondaryBackground)
+                .cornerRadius(8)
+
+                Spacer()
+
+                Toggle("Include Residential", isOn: $viewModel.showResidential)
+                    .font(.caption)
+                    .toggleStyle(.button)
+                    .tint(Color(red: 0.05, green: 0.35, blue: 0.32))
+            }
+        }
+    }
+
+    private func scorePresetButton(title: String, score: Double) -> some View {
+        Button {
+            viewModel.minValueScore = score
+        } label: {
+            Text(title)
+                .font(.system(size: 10, weight: viewModel.minValueScore == score ? .bold : .medium))
+                .padding(.horizontal, 6)
+                .padding(.vertical, 3)
+                .background(viewModel.minValueScore == score ? Color.teal : Color.scoutGroupedBackground)
+                .foregroundColor(viewModel.minValueScore == score ? .black : .secondary)
+                .cornerRadius(6)
+        }
+    }
+
+    // MARK: - Shared Region Bar (Includes "All Regions" and Regional Tabs)
     private var regionBar: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
-                ForEach(RegionId.allCases) { region in
+                ForEach(RegionFilter.allCases) { region in
                     Button {
                         viewModel.selectedRegion = region
                     } label: {
                         VStack(alignment: .leading, spacing: 2) {
                             Text(region.label)
                                 .font(.system(size: 12, weight: viewModel.selectedRegion == region ? .bold : .medium))
-                            Text(region.states.joined(separator: ", "))
+                            Text(region.subtitle)
                                 .font(.system(size: 9))
                                 .opacity(0.8)
                         }
