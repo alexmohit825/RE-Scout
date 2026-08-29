@@ -5,7 +5,7 @@
     <key>CFBundleDevelopmentRegion</key>
     <string>$(DEVELOPMENT_LANGUAGE)</string>
     <key>CFBundleDisplayName</key>
-    <string>RE Scout</string>
+    <string>RE Scout Pro</string>
     <key>CFBundleExecutable</key>
     <string>$(EXECUTABLE_NAME)</string>
     <key>CFBundleIdentifier</key>
@@ -13,11 +13,11 @@
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>CFBundleName</key>
-    <string>RE Scout</string>
+    <string>REScout</string>
     <key>CFBundlePackageType</key>
     <string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
     <key>CFBundleShortVersionString</key>
-    <string>1.0</string>
+    <string>1.0.0</string>
     <key>CFBundleVersion</key>
     <string>$(CURRENT_PROJECT_VERSION)</string>
     <key>CFBundleIconName</key>
@@ -27,9 +27,9 @@
     <key>LSRequiresIPhoneOS</key>
     <true/>
     <key>NSCameraUsageDescription</key>
-    <string>RE Scout uses your camera to scan real estate flyers, offering memorandums, and signage for instant on-device underwriting.</string>
+    <string>RE Scout Pro uses your camera to scan real estate flyers, offering memorandums, and signage for instant on-device underwriting.</string>
     <key>NSLocationWhenInUseUsageDescription</key>
-    <string>RE Scout uses your location to discover and evaluate nearby commercial and residential properties.</string>
+    <string>RE Scout Pro uses your location to discover and evaluate nearby commercial and residential properties.</string>
     <key>UILaunchScreen</key>
     <dict/>
     <key>UISupportedInterfaceOrientations</key>

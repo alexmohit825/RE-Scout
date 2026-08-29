@@ -77,6 +77,8 @@ jobs:
             -project REScout.xcodeproj \
             -scheme REScout \
             -destination 'generic/platform=iOS Simulator' \
+            CURRENT_PROJECT_VERSION="${{ github.run_number }}" \
+            MARKETING_VERSION="1.0.0" \
             CODE_SIGNING_ALLOWED=NO
           echo "✓ iOS Target compiled and validated successfully."
 
@@ -86,7 +88,7 @@ jobs:
           ASC_ISSUER_ID: "73c7355a-beef-4d79-919d-c3d7dec7747a"
         run: |
           mkdir -p build
-          echo "Archiving REScout target for generic iOS device..."
+          echo "Archiving REScout target for generic iOS device (Build #${{ github.run_number }})..."
           xcodebuild archive \
             -project REScout.xcodeproj \
             -scheme REScout \
@@ -96,7 +98,9 @@ jobs:
             -allowProvisioningUpdates \
             -authenticationKeyPath ~/.appstoreconnect/private_keys/AuthKey_38F6WA87DU.p8 \
             -authenticationKeyID "$ASC_KEY_ID" \
-            -authenticationKeyIssuerID "$ASC_ISSUER_ID"
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
+            CURRENT_PROJECT_VERSION="${{ github.run_number }}" \
+            MARKETING_VERSION="1.0.0"
 
       - name: 📤 Export IPA Package & Deliver to TestFlight
         env:
