@@ -1,5 +1,5 @@
 import Foundation
-import CoreLocation
+@preconcurrency import CoreLocation
 
 /// Asynchronous on-device geocoding service powered by Apple's CoreLocation framework.
 public final class GeocodingService: Sendable {

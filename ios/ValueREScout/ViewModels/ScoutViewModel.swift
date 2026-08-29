@@ -130,7 +130,7 @@ public final class ScoutViewModel {
 
     public func addProperty(_ property: Property) {
         customProperties.insert(property, at: 0)
-        selectedRegion = property.region
+        selectedRegion = RegionFilter(rawValue: property.region.rawValue) ?? .all
         selectedProperty = property
         saveCustomProperties()
     }
