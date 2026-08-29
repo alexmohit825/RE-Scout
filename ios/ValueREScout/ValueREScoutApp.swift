@@ -10,11 +10,11 @@ struct ValueREScoutApp: App {
     }
 }
 
-// MARK: - Apple Intelligence App Intent for Siri & Shortcuts
+// MARK: - App Intent for Siri & Shortcuts
 @available(iOS 16.0, macOS 13.0, watchOS 9.0, tvOS 16.0, *)
 public struct UnderwritePropertyIntent: AppIntent {
-    public static var title: LocalizedStringResource = "Underwrite Property with Apple Intelligence"
-    public static var description = IntentDescription("Underwrites a commercial real estate property using on-device Apple Intelligence.")
+    public static var title: LocalizedStringResource = "Underwrite Real Estate Property"
+    public static var description = IntentDescription("Underwrites a commercial or residential real estate property using on-device neural underwriting.")
 
     @Parameter(title: "Property Listing or Address")
     public var inputQuery: String
