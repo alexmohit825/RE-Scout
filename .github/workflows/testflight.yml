@@ -102,13 +102,13 @@ jobs:
             CURRENT_PROJECT_VERSION="${{ github.run_number }}" \
             MARKETING_VERSION="1.0.0"
 
-      - name: 📤 Export IPA Package & Deliver to TestFlight
+      - name: 📤 Export & Deliver to TestFlight via Apple Direct Upload
         env:
           ASC_KEY_ID: "38F6WA87DU"
           ASC_ISSUER_ID: "73c7355a-beef-4d79-919d-c3d7dec7747a"
         run: |
           mkdir -p build/output
-          echo "Exporting IPA from archive..."
+          echo "Uploading archive directly to App Store Connect via native xcodebuild distribution..."
           xcodebuild -exportArchive \
             -archivePath build/REScout.xcarchive \
             -exportOptionsPlist ExportOptions.plist \
@@ -117,26 +117,9 @@ jobs:
             -authenticationKeyPath ~/.appstoreconnect/private_keys/AuthKey_38F6WA87DU.p8 \
             -authenticationKeyID "$ASC_KEY_ID" \
             -authenticationKeyIssuerID "$ASC_ISSUER_ID"
+          echo "✓ Native xcodebuild upload completed!"
 
-          echo "Exported files in build/output:"
-          ls -la build/output
-
-          IPA_PATH=$(find build/output -name "*.ipa" | head -n 1)
-          if [ -n "$IPA_PATH" ]; then
-            echo "Delivering $IPA_PATH directly to TestFlight via App Store Connect..."
-            xcrun altool --upload-app \
-              -f "$IPA_PATH" \
-              -t ios \
-              --apiKey "$ASC_KEY_ID" \
-              --apiIssuer "$ASC_ISSUER_ID" \
-              --show-progress
-            echo "✓ IPA successfully uploaded and verified with Apple TestFlight!"
-          else
-            echo "ERROR: No .ipa file found in build/output."
-            exit 1
-          fi
-
-      - name: 🗂️ Upload Build Artifacts (IPA)
+      - name: 🗂️ Upload Build Artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
