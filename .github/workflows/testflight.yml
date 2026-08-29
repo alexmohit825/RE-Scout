@@ -83,9 +83,6 @@ jobs:
           echo "✓ iOS Target compiled and validated successfully."
 
       - name: 🚀 Archive Release Candidate for TestFlight
-        env:
-          ASC_KEY_ID: "38F6WA87DU"
-          ASC_ISSUER_ID: "73c7355a-beef-4d79-919d-c3d7dec7747a"
         run: |
           mkdir -p build
           echo "Archiving REScout target for generic iOS device (Build #${{ github.run_number }})..."
@@ -95,12 +92,10 @@ jobs:
             -configuration Release \
             -archivePath build/REScout.xcarchive \
             -destination 'generic/platform=iOS' \
-            -allowProvisioningUpdates \
-            -authenticationKeyPath ~/.appstoreconnect/private_keys/AuthKey_38F6WA87DU.p8 \
-            -authenticationKeyID "$ASC_KEY_ID" \
-            -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
             CURRENT_PROJECT_VERSION="${{ github.run_number }}" \
-            MARKETING_VERSION="1.0.0"
+            MARKETING_VERSION="1.0.0" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO
 
       - name: 📤 Export & Deliver to TestFlight via Apple Direct Upload
         env:
