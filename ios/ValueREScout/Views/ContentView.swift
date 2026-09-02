@@ -115,9 +115,7 @@ public struct ContentView: View {
                 #endif
             }
             .sheet(isPresented: $viewModel.isScannerPresented) {
-                VisionFlyerScannerView { scoutedProp in
-                    viewModel.addScoutedProperty(scoutedProp)
-                }
+                VisionFlyerScannerView(viewModel: viewModel)
             }
             .sheet(isPresented: $viewModel.isPaywallPresented) {
                 PaywallView()
@@ -158,7 +156,7 @@ public struct ContentView: View {
 
             YieldScatterChartView(
                 properties: viewModel.filteredProperties,
-                selectedProperty: $viewModel.selectedProperty
+                regionLabel: viewModel.selectedRegion.rawValue
             )
             .padding()
 
