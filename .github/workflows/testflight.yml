@@ -39,6 +39,8 @@ jobs:
         run: brew install xcodegen
 
       - name: 🏗️ Generate Native Xcode Project
+        env:
+          BUILD_NUMBER: ${{ github.run_number }}
         run: xcodegen generate
 
       - name: 🔄 Sync REScout.xcodeproj for Apple Xcode Cloud
