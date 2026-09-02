@@ -14,6 +14,7 @@
 		47957EB0EFF1E1073B643EB9 /* OpenParcelRegistryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D3A8409CACAFFA0FCCA6ED3 /* OpenParcelRegistryService.swift */; };
 		6EF80B75A7C6A93BC71F80C5 /* ValueREScoutApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E82A6D970AD3F781E664DEEC /* ValueREScoutApp.swift */; };
 		7282C754EC406A8BEE8AFE0A /* PropertyCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 953800C9625B92F1D337ABE9 /* PropertyCardView.swift */; };
+		7558A84730654552AED5F38B /* SubscriptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 697D1E066B310F1CA668FA2E /* SubscriptionManager.swift */; };
 		7BBCF527D261EF2EF47F4A8E /* PropertyData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AF6E2BFC718EB04C4634D87 /* PropertyData.swift */; };
 		88DF02072379ABFBCFB6D3B6 /* UnderwritingCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CA78C059A1E0D77B04113AA /* UnderwritingCalculator.swift */; };
 		8BC9BA20581BF83466499493 /* Property.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDF47471E44B61E5E99761F4 /* Property.swift */; };
@@ -23,6 +24,7 @@
 		C605D957D72FB2CA46EDFCC2 /* AppleIntelligenceScoutService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E9202F622F3706FF267BE81 /* AppleIntelligenceScoutService.swift */; };
 		CAD75C293D4B65D8284D7CFE /* ScoutViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B742957A18C728D080F64787 /* ScoutViewModel.swift */; };
 		E6C8551C2FDF4FD6AA9B1DA9 /* PropertyDossierPDFView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ED1ED73C811C0481C66123E /* PropertyDossierPDFView.swift */; };
+		EBB0379E317296360329BA48 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD3EA5032B01B201467670A3 /* PaywallView.swift */; };
 		EFB086E46AEE2480B56D1439 /* VisionFlyerScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E49778A5FAA304FFB9026914 /* VisionFlyerScannerView.swift */; };
 		F1804280A6E7E2F5DD76DC71 /* PDFExportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D8123CC2508837BAE5755C /* PDFExportService.swift */; };
 		FB91218492DECD78E6C744BD /* ThemeColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F8B9B2BE4621C9D156CD6A4 /* ThemeColors.swift */; };
@@ -40,6 +42,7 @@
 		2D3A8409CACAFFA0FCCA6ED3 /* OpenParcelRegistryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenParcelRegistryService.swift; sourceTree = "<group>"; };
 		4AF6E2BFC718EB04C4634D87 /* PropertyData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PropertyData.swift; sourceTree = "<group>"; };
 		566F7599D9D33A1DD5625F0C /* GeocodingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeocodingService.swift; sourceTree = "<group>"; };
+		697D1E066B310F1CA668FA2E /* SubscriptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionManager.swift; sourceTree = "<group>"; };
 		6ED1ED73C811C0481C66123E /* PropertyDossierPDFView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PropertyDossierPDFView.swift; sourceTree = "<group>"; };
 		953800C9625B92F1D337ABE9 /* PropertyCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PropertyCardView.swift; sourceTree = "<group>"; };
 		A7CF3014198AB8066F7384E4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -50,6 +53,7 @@
 		E49778A5FAA304FFB9026914 /* VisionFlyerScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionFlyerScannerView.swift; sourceTree = "<group>"; };
 		E82A6D970AD3F781E664DEEC /* ValueREScoutApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValueREScoutApp.swift; sourceTree = "<group>"; };
 		FBD71920630E5793EC2D61D5 /* ValidationGuideView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValidationGuideView.swift; sourceTree = "<group>"; };
+		FD3EA5032B01B201467670A3 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -92,6 +96,7 @@
 				566F7599D9D33A1DD5625F0C /* GeocodingService.swift */,
 				2D3A8409CACAFFA0FCCA6ED3 /* OpenParcelRegistryService.swift */,
 				28D8123CC2508837BAE5755C /* PDFExportService.swift */,
+				697D1E066B310F1CA668FA2E /* SubscriptionManager.swift */,
 				0CA78C059A1E0D77B04113AA /* UnderwritingCalculator.swift */,
 			);
 			path = Services;
@@ -101,6 +106,7 @@
 			isa = PBXGroup;
 			children = (
 				B7921432C5301D8BFB8395E9 /* ContentView.swift */,
+				FD3EA5032B01B201467670A3 /* PaywallView.swift */,
 				953800C9625B92F1D337ABE9 /* PropertyCardView.swift */,
 				6ED1ED73C811C0481C66123E /* PropertyDossierPDFView.swift */,
 				03DD0F5449D02DAC9A6B6BD7 /* ScoutMapView.swift */,
@@ -213,6 +219,7 @@
 				0735908479883A771759A8F7 /* GeocodingService.swift in Sources */,
 				47957EB0EFF1E1073B643EB9 /* OpenParcelRegistryService.swift in Sources */,
 				F1804280A6E7E2F5DD76DC71 /* PDFExportService.swift in Sources */,
+				EBB0379E317296360329BA48 /* PaywallView.swift in Sources */,
 				8BC9BA20581BF83466499493 /* Property.swift in Sources */,
 				7282C754EC406A8BEE8AFE0A /* PropertyCardView.swift in Sources */,
 				7BBCF527D261EF2EF47F4A8E /* PropertyData.swift in Sources */,
@@ -220,6 +227,7 @@
 				B77DF2A61AF3B7BC66C4CC36 /* ScoutMapView.swift in Sources */,
 				97ACEFB571B27338D7D468C4 /* ScoutTerminalView.swift in Sources */,
 				CAD75C293D4B65D8284D7CFE /* ScoutViewModel.swift in Sources */,
+				7558A84730654552AED5F38B /* SubscriptionManager.swift in Sources */,
 				FB91218492DECD78E6C744BD /* ThemeColors.swift in Sources */,
 				88DF02072379ABFBCFB6D3B6 /* UnderwritingCalculator.swift in Sources */,
 				326882889E98437E4344A246 /* ValidationGuideView.swift in Sources */,
