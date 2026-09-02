@@ -43,12 +43,15 @@ public final class ScoutViewModel {
     public var displayMode: AppDisplayMode = .map
     public var selectedProperty: Property?
     public var isScannerPresented: Bool = false
+    public var isPaywallPresented: Bool = false
     
     // Scout State
     public var scoutInputText: String = ""
     public var isScouting: Bool = false
     public var scoutError: String?
     public var lastScoutedProperty: Property?
+    
+    public let freeDealLimit: Int = 5
     
     @ObservationIgnored
     private let scoutService = AppleIntelligenceScoutService.shared
@@ -108,7 +111,23 @@ public final class ScoutViewModel {
         }
     }
 
+    public func isPropertyLocked(_ property: Property) -> Bool {
+        if SubscriptionManager.shared.isProUser {
+            return false
+        }
+        let list = filteredProperties
+        if let index = list.firstIndex(where: { $0.id == property.id }) {
+            return index >= freeDealLimit
+        }
+        return false
+    }
+
     public func scoutWithAppleIntelligence() async {
+        if !SubscriptionManager.shared.isProUser && properties.count >= freeDealLimit {
+            isPaywallPresented = true
+            return
+        }
+
         let input = scoutInputText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !input.isEmpty else { return }
 
@@ -118,39 +137,36 @@ public final class ScoutViewModel {
         do {
             let property = try await scoutService.scoutProperty(input: input)
             self.lastScoutedProperty = property
-            self.addProperty(property)
+            self.customProperties.insert(property, at: 0)
             self.selectedProperty = property
             self.scoutInputText = ""
+            saveCustomProperties()
+            self.isScouting = false
         } catch {
             self.scoutError = error.localizedDescription
+            self.isScouting = false
         }
-
-        isScouting = false
     }
 
-    public func addProperty(_ property: Property) {
+    public func addScoutedProperty(_ property: Property) {
         customProperties.insert(property, at: 0)
-        selectedRegion = RegionFilter(rawValue: property.region.rawValue) ?? .all
         selectedProperty = property
         saveCustomProperties()
     }
 
-    public func removeProperty(id: String) {
+    public func removeCustomProperty(id: String) {
         customProperties.removeAll { $0.id == id }
-        if selectedProperty?.id == id {
-            selectedProperty = nil
-        }
         saveCustomProperties()
     }
 
     private func saveCustomProperties() {
         if let encoded = try? JSONEncoder().encode(customProperties) {
-            UserDefaults.standard.set(encoded, forKey: "custom_scouted_properties")
+            UserDefaults.standard.set(encoded, forKey: "scout_custom_properties_v2")
         }
     }
 
     private func loadCustomProperties() {
-        if let data = UserDefaults.standard.data(forKey: "custom_scouted_properties"),
+        if let data = UserDefaults.standard.data(forKey: "scout_custom_properties_v2"),
            let decoded = try? JSONDecoder().decode([Property].self, from: data) {
             self.customProperties = decoded
         }

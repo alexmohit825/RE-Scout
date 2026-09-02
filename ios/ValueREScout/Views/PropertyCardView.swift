@@ -19,6 +19,7 @@ public struct PropertyCardView: View {
     @State private var isLoadingParcel: Bool = false
     @State private var exportedPDFURL: URL? = nil
     @State private var isSharePresented: Bool = false
+    @State private var isPaywallPresented: Bool = false
 
     public init(property: Property, onRemove: (() -> Void)? = nil) {
         self.property = property
@@ -212,7 +213,9 @@ public struct PropertyCardView: View {
             }
 
             Button {
-                if let url = PDFExportService.shared.exportUnderwritingPDF(
+                if !SubscriptionManager.shared.isProUser {
+                    self.isPaywallPresented = true
+                } else if let url = PDFExportService.shared.exportUnderwritingPDF(
                     property: property,
                     loanModel: loanCalculations,
                     parcelData: parcelData
@@ -231,6 +234,9 @@ public struct PropertyCardView: View {
                 .padding(.vertical, 6)
                 .background(Color.teal.opacity(0.12))
                 .cornerRadius(8)
+            }
+            .sheet(isPresented: $isPaywallPresented) {
+                PaywallView()
             }
 
             Spacer()

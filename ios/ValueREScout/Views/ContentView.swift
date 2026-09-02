@@ -5,6 +5,7 @@ public struct ContentView: View {
     @State private var viewModel = ScoutViewModel()
     @State private var isMapSheetPresented: Bool = true
     @State private var showFiltersSheet: Bool = false
+    @ObservedObject private var subscriptionManager = SubscriptionManager.shared
 
     public init() {}
 
@@ -35,6 +36,16 @@ public struct ContentView: View {
                         Text("RE Scout Pro")
                             .font(.headline)
                             .fontWeight(.black)
+                        
+                        if subscriptionManager.isProUser {
+                            Text("PRO")
+                                .font(.system(size: 9, weight: .bold))
+                                .foregroundColor(.black)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(Color.teal)
+                                .clipShape(Capsule())
+                        }
                     }
                 }
 
@@ -49,12 +60,37 @@ public struct ContentView: View {
                 }
 
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        viewModel.isScannerPresented = true
-                    } label: {
-                        Image(systemName: "camera.viewfinder")
-                            .font(.subheadline)
-                            .foregroundColor(.teal)
+                    HStack(spacing: 8) {
+                        if !subscriptionManager.isProUser {
+                            Button {
+                                viewModel.isPaywallPresented = true
+                            } label: {
+                                HStack(spacing: 3) {
+                                    Image(systemName: "crown.fill")
+                                        .foregroundColor(.yellow)
+                                    Text("Pro")
+                                        .foregroundColor(.white)
+                                }
+                                .font(.system(size: 11, weight: .bold))
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(Color.teal.opacity(0.2))
+                                .clipShape(Capsule())
+                                .overlay(Capsule().stroke(Color.teal.opacity(0.4), lineWidth: 1))
+                            }
+                        }
+
+                        Button {
+                            if !subscriptionManager.isProUser {
+                                viewModel.isPaywallPresented = true
+                            } else {
+                                viewModel.isScannerPresented = true
+                            }
+                        } label: {
+                            Image(systemName: "camera.viewfinder")
+                                .font(.subheadline)
+                                .foregroundColor(.teal)
+                        }
                     }
                 }
                 #else
@@ -75,328 +111,303 @@ public struct ContentView: View {
                         }
                     }
                     .pickerStyle(.segmented)
-                    .frame(maxWidth: 220)
-                }
-
-                ToolbarItem(placement: .primaryAction) {
-                    Button {
-                        viewModel.isScannerPresented = true
-                    } label: {
-                        Image(systemName: "camera.viewfinder")
-                            .font(.subheadline)
-                            .foregroundColor(.teal)
-                    }
                 }
                 #endif
             }
             .sheet(isPresented: $viewModel.isScannerPresented) {
-                VisionFlyerScannerView(viewModel: viewModel)
+                VisionFlyerScannerView { scoutedProp in
+                    viewModel.addScoutedProperty(scoutedProp)
+                }
+            }
+            .sheet(isPresented: $viewModel.isPaywallPresented) {
+                PaywallView()
+            }
+            .sheet(isPresented: $showFiltersSheet) {
+                filtersSheetView
             }
         }
     }
 
-    // MARK: - 1. Spatial Map HUD Mode (Apple Maps Style Sheet Detents)
+    // MARK: - Subviews
+
     private var mapHUDView: some View {
-        ZStack {
+        ZStack(alignment: .bottom) {
             ScoutMapView(viewModel: viewModel)
                 .ignoresSafeArea(edges: .bottom)
+
+            VStack(spacing: 8) {
+                quickFilterBar
+                if let selected = viewModel.selectedProperty {
+                    PropertyCardView(property: selected, onRemove: {
+                        viewModel.removeCustomProperty(id: selected.id)
+                        viewModel.selectedProperty = nil
+                    })
+                    .padding(.horizontal)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
+            }
+            .padding(.bottom, 10)
         }
-        .sheet(isPresented: $isMapSheetPresented) {
-            NavigationStack {
+    }
+
+    private var scatterMatrixView: some View {
+        VStack(spacing: 0) {
+            quickFilterBar
+                .padding(.vertical, 8)
+                .background(Color.scoutSecondaryBackground)
+
+            YieldScatterChartView(
+                properties: viewModel.filteredProperties,
+                selectedProperty: $viewModel.selectedProperty
+            )
+            .padding()
+
+            if let selected = viewModel.selectedProperty {
                 ScrollView {
-                    VStack(spacing: 14) {
-                        // Region Pill Selector
-                        regionBar
+                    PropertyCardView(property: selected, onRemove: {
+                        viewModel.removeCustomProperty(id: selected.id)
+                        viewModel.selectedProperty = nil
+                    })
+                    .padding(.horizontal)
+                }
+                .frame(maxHeight: 280)
+            }
+        }
+        .background(Color.scoutBackground)
+    }
 
-                        // Value Score Potential Slider & Search
-                        scoreAndSearchControlBar
+    private var listDossierView: some View {
+        VStack(spacing: 0) {
+            quickFilterBar
+                .padding(.vertical, 8)
+                .background(Color.scoutSecondaryBackground)
 
-                        // Selected Property Quick Preview (if any)
-                        if let selected = viewModel.selectedProperty {
-                            VStack(alignment: .leading, spacing: 6) {
-                                HStack {
-                                    Label("Selected Property", systemImage: "scope")
-                                        .font(.caption)
-                                        .fontWeight(.bold)
-                                        .foregroundColor(.teal)
-                                    Spacer()
-                                    Button("Clear") {
-                                        viewModel.selectedProperty = nil
+            if !subscriptionManager.isProUser {
+                HStack(spacing: 12) {
+                    Image(systemName: "sparkles")
+                        .foregroundColor(.teal)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Free Deal Pipeline: 5 of \(viewModel.filteredProperties.count) Unlocked")
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundColor(.white)
+                        Text("Upgrade to Pro for the full 25+ nationwide pipeline & PDF exports")
+                            .font(.system(size: 10))
+                            .foregroundColor(.gray)
+                    }
+                    Spacer()
+                    Button("Unlock All") {
+                        viewModel.isPaywallPresented = true
+                    }
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundColor(.black)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .background(Color.teal)
+                    .clipShape(Capsule())
+                }
+                .padding(10)
+                .background(Color(white: 0.1))
+                .cornerRadius(14)
+                .padding(.horizontal)
+                .padding(.top, 8)
+            }
+
+            ScrollView {
+                LazyVStack(spacing: 14) {
+                    ForEach(Array(viewModel.filteredProperties.enumerated()), id: \.element.id) { index, property in
+                        let isLocked = viewModel.isPropertyLocked(property)
+                        
+                        if isLocked {
+                            Button {
+                                viewModel.isPaywallPresented = true
+                            } label: {
+                                HStack(spacing: 14) {
+                                    ZStack {
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .fill(Color(white: 0.15))
+                                            .frame(width: 50, height: 50)
+                                        Image(systemName: "lock.fill")
+                                            .foregroundColor(.yellow)
                                     }
-                                    .font(.caption2)
-                                    .foregroundColor(.secondary)
+                                    
+                                    VStack(alignment: .leading, spacing: 3) {
+                                        HStack {
+                                            Text(property.address)
+                                                .font(.subheadline)
+                                                .fontWeight(.bold)
+                                                .foregroundColor(.white)
+                                            Spacer()
+                                            Text("PRO DEAL")
+                                                .font(.system(size: 9, weight: .bold))
+                                                .foregroundColor(.black)
+                                                .padding(.horizontal, 6)
+                                                .padding(.vertical, 2)
+                                                .background(Color.yellow)
+                                                .clipShape(Capsule())
+                                        }
+                                        Text("\(property.city), \(property.state) • \(property.type.replacingOccurrences(of: "_", with: " ").capitalized)")
+                                            .font(.caption2)
+                                            .foregroundColor(.gray)
+                                        Text("Tap to unlock full valuation & underwriting memo")
+                                            .font(.system(size: 10))
+                                            .foregroundColor(.teal)
+                                    }
                                 }
-
-                                PropertyCardView(
-                                    property: selected,
-                                    onRemove: viewModel.customProperties.contains(where: { $0.id == selected.id }) ? {
-                                        viewModel.removeProperty(id: selected.id)
-                                    } : nil
+                                .padding(12)
+                                .background(Color(white: 0.08))
+                                .cornerRadius(16)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 16)
+                                        .stroke(Color.gray.opacity(0.3), lineWidth: 1)
                                 )
                             }
-                        }
-
-                        // Filtered Properties Header & List
-                        VStack(alignment: .leading, spacing: 10) {
-                            HStack {
-                                Text("Scouted Dossiers (\(viewModel.filteredProperties.count))")
-                                    .font(.headline)
-                                    .fontWeight(.bold)
-                                Spacer()
-                                Picker("Sort", selection: $viewModel.sortBy) {
-                                    ForEach(SortField.allCases) { opt in
-                                        Text(opt.rawValue).tag(opt)
-                                    }
-                                }
-                                .pickerStyle(.menu)
-                                .font(.caption)
-                            }
-
-                            ForEach(viewModel.filteredProperties) { prop in
-                                if prop.id != viewModel.selectedProperty?.id {
-                                    PropertyCardView(
-                                        property: prop,
-                                        onRemove: viewModel.customProperties.contains(where: { $0.id == prop.id }) ? {
-                                            viewModel.removeProperty(id: prop.id)
-                                        } : nil
-                                    )
-                                }
-                            }
+                        } else {
+                            PropertyCardView(property: property, onRemove: {
+                                viewModel.removeCustomProperty(id: property.id)
+                            })
                         }
                     }
-                    .padding(16)
                 }
-                .navigationTitle("Field Scout Dossier")
-                .scoutInlineNavigationBar()
+                .padding()
             }
-            .scoutSheetDetents()
         }
+        .background(Color.scoutBackground)
     }
 
-    // MARK: - 2. Yield Scatter Matrix Mode
-    private var scatterMatrixView: some View {
-        ScrollView {
-            VStack(spacing: 16) {
-                regionBar
-
-                scoreAndSearchControlBar
-
-                YieldScatterChartView(
-                    properties: viewModel.filteredProperties,
-                    regionLabel: viewModel.selectedRegion.label
-                )
-
-                ValidationGuideView()
-
-                // Properties in Region
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("Assets in Yield Cluster (\(viewModel.filteredProperties.count))")
-                        .font(.headline)
-                        .fontWeight(.bold)
-
-                    ForEach(viewModel.filteredProperties) { prop in
-                        PropertyCardView(
-                            property: prop,
-                            onRemove: viewModel.customProperties.contains(where: { $0.id == prop.id }) ? {
-                                viewModel.removeProperty(id: prop.id)
-                            } : nil
-                        )
-                    }
-                }
-            }
-            .padding(16)
-        }
-        .background(Color.scoutGroupedBackground)
-    }
-
-    // MARK: - 3. AI Terminal & NLP Ingestion Mode
     private var terminalScoutView: some View {
-        ScrollView {
-            VStack(spacing: 16) {
-                ScoutTerminalView(viewModel: viewModel)
+        ScoutTerminalView(viewModel: viewModel)
+    }
 
-                ValidationGuideView()
+    private var quickFilterBar: some View {
+        HStack(spacing: 8) {
+            // Region Selector
+            Menu {
+                Picker("Region", selection: $viewModel.selectedRegion) {
+                    ForEach(RegionFilter.allCases) { region in
+                        Text(region.rawValue).tag(region)
+                    }
+                }
+            } label: {
+                HStack(spacing: 4) {
+                    Image(systemName: "map")
+                    Text(viewModel.selectedRegion.rawValue)
+                        .lineLimit(1)
+                }
+                .font(.caption2)
+                .fontWeight(.semibold)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
+                .background(Color.scoutTertiaryBackground)
+                .foregroundColor(.primary)
+                .cornerRadius(8)
+            }
 
-                if let last = viewModel.lastScoutedProperty {
+            // Sort Menu
+            Menu {
+                Picker("Sort", selection: $viewModel.sortBy) {
+                    ForEach(SortField.allCases) { sort in
+                        Text(sort.rawValue).tag(sort)
+                    }
+                }
+            } label: {
+                HStack(spacing: 4) {
+                    Image(systemName: "arrow.up.arrow.down")
+                    Text(viewModel.sortBy.rawValue)
+                        .lineLimit(1)
+                }
+                .font(.caption2)
+                .fontWeight(.semibold)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
+                .background(Color.scoutTertiaryBackground)
+                .foregroundColor(.primary)
+                .cornerRadius(8)
+            }
+
+            Spacer()
+
+            // Filters Sheet Button
+            Button {
+                showFiltersSheet = true
+            } label: {
+                HStack(spacing: 4) {
+                    Image(systemName: "line.3.horizontal.decrease.circle")
+                    Text("Filters")
+                }
+                .font(.caption2)
+                .fontWeight(.bold)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
+                .background(viewModel.minValueScore > 0 || viewModel.showResidential ? Color.teal : Color.scoutTertiaryBackground)
+                .foregroundColor(viewModel.minValueScore > 0 || viewModel.showResidential ? .black : .primary)
+                .cornerRadius(8)
+            }
+        }
+        .padding(.horizontal)
+    }
+
+    private var filtersSheetView: some View {
+        NavigationStack {
+            Form {
+                Section("Filter by Value Score") {
                     VStack(alignment: .leading, spacing: 8) {
-                        Label("Latest AI Ingestion", systemImage: "sparkles")
-                            .font(.headline)
+                        HStack {
+                            Text("Minimum Value Score")
+                            Spacer()
+                            Text("\(Int(viewModel.minValueScore))")
+                                .fontWeight(.bold)
+                                .foregroundColor(.teal)
+                        }
+                        Slider(value: $viewModel.minValueScore, in: 0...100, step: 5)
+                            .tint(.teal)
+                    }
+                }
+
+                Section("Property Classification") {
+                    Toggle("Include Residential (SFR/Duplex)", isOn: $viewModel.showResidential)
+                        .tint(.teal)
+                }
+
+                Section("Membership") {
+                    HStack {
+                        Image(systemName: "crown.fill")
+                            .foregroundColor(.yellow)
+                        Text(subscriptionManager.isProUser ? "RE Scout Pro Active" : "Free Plan (5 Deals)")
+                        Spacer()
+                        if !subscriptionManager.isProUser {
+                            Button("Upgrade") {
+                                showFiltersSheet = false
+                                viewModel.isPaywallPresented = true
+                            }
+                            .font(.caption)
                             .fontWeight(.bold)
                             .foregroundColor(.teal)
-
-                        PropertyCardView(
-                            property: last,
-                            onRemove: { viewModel.removeProperty(id: last.id) }
-                        )
+                        }
+                    }
+                    
+                    Button("Restore Purchases") {
+                        Task {
+                            await subscriptionManager.restorePurchases()
+                        }
                     }
                 }
-            }
-            .padding(16)
-        }
-        .background(Color.scoutGroupedBackground)
-    }
 
-    // MARK: - 4. Full List Dossier Mode
-    private var listDossierView: some View {
-        ScrollView {
-            VStack(spacing: 16) {
-                // Header Search & Filters
-                VStack(spacing: 10) {
-                    regionBar
-
-                    scoreAndSearchControlBar
-                }
-
-                // Property List
-                VStack(alignment: .leading, spacing: 12) {
+                Section("About & Legal") {
+                    Link("Privacy Policy", destination: URL(string: "https://github.com/alexmohit825/RE-Scout/blob/main/PRIVACY_POLICY.md")!)
+                    Link("Terms of Use (EULA)", destination: URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!)
                     HStack {
-                        Text("All Scouted Properties (\(viewModel.filteredProperties.count))")
-                            .font(.headline)
-                            .fontWeight(.bold)
+                        Text("Copyright")
                         Spacer()
-                    }
-
-                    if viewModel.filteredProperties.isEmpty {
-                        VStack(spacing: 8) {
-                            Text("No properties match active filters.")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(40)
-                        .background(Color.scoutSecondaryBackground)
-                        .cornerRadius(12)
-                    } else {
-                        ForEach(viewModel.filteredProperties) { prop in
-                            PropertyCardView(
-                                property: prop,
-                                onRemove: viewModel.customProperties.contains(where: { $0.id == prop.id }) ? {
-                                    viewModel.removeProperty(id: prop.id)
-                                } : nil
-                            )
-                        }
-                    }
-                }
-            }
-            .padding(16)
-        }
-        .background(Color.scoutGroupedBackground)
-    }
-
-    // MARK: - Shared Controls: Score Slider, Search & Residential Toggle
-    private var scoreAndSearchControlBar: some View {
-        VStack(spacing: 10) {
-            // Search Input
-            HStack {
-                Image(systemName: "magnifyingglass")
-                    .foregroundColor(.secondary)
-                TextField("Search address, city, state...", text: $viewModel.searchQuery)
-                    .font(.subheadline)
-                if !viewModel.searchQuery.isEmpty {
-                    Button {
-                        viewModel.searchQuery = ""
-                    } label: {
-                        Image(systemName: "xmark.circle.fill")
+                        Text("2026 A. Alex Mohit")
                             .foregroundColor(.secondary)
                     }
                 }
             }
-            .padding(10)
-            .background(Color.scoutSecondaryBackground)
-            .cornerRadius(10)
-
-            // Minimum Value Score Potential Slider
-            VStack(alignment: .leading, spacing: 6) {
-                HStack {
-                    Label {
-                        Text("Min Value Score:")
-                            .font(.caption)
-                            .fontWeight(.semibold)
-                    } icon: {
-                        Image(systemName: "chart.line.uptrend.xyaxis")
-                            .foregroundColor(.teal)
-                    }
-
-                    Text(viewModel.minValueScore > 0 ? "\(Int(viewModel.minValueScore))+" : "All Scores")
-                        .font(.caption)
-                        .fontWeight(.bold)
-                        .foregroundColor(viewModel.minValueScore >= 70 ? .green : (viewModel.minValueScore >= 50 ? .orange : .secondary))
-
-                    Spacer()
-
-                    // Quick Score Presets
-                    HStack(spacing: 4) {
-                        scorePresetButton(title: "All", score: 0)
-                        scorePresetButton(title: "70+", score: 70)
-                        scorePresetButton(title: "80+", score: 80)
-                    }
-                }
-
-                Slider(value: $viewModel.minValueScore, in: 0...90, step: 5)
-                    .tint(.teal)
-            }
-            .padding(10)
-            .background(Color.scoutSecondaryBackground)
-            .cornerRadius(10)
-
-            // Secondary Toggles: Residential & Sort
-            HStack {
-                Picker("Sort By", selection: $viewModel.sortBy) {
-                    ForEach(SortField.allCases) { opt in
-                        Text(opt.rawValue).tag(opt)
-                    }
-                }
-                .pickerStyle(.menu)
-                .font(.caption)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(Color.scoutSecondaryBackground)
-                .cornerRadius(8)
-
-                Spacer()
-
-                Toggle("Include Residential", isOn: $viewModel.showResidential)
-                    .font(.caption)
-                    .toggleStyle(.button)
-                    .tint(Color(red: 0.05, green: 0.35, blue: 0.32))
-            }
-        }
-    }
-
-    private func scorePresetButton(title: String, score: Double) -> some View {
-        Button {
-            viewModel.minValueScore = score
-        } label: {
-            Text(title)
-                .font(.system(size: 10, weight: viewModel.minValueScore == score ? .bold : .medium))
-                .padding(.horizontal, 6)
-                .padding(.vertical, 3)
-                .background(viewModel.minValueScore == score ? Color.teal : Color.scoutGroupedBackground)
-                .foregroundColor(viewModel.minValueScore == score ? .black : .secondary)
-                .cornerRadius(6)
-        }
-    }
-
-    // MARK: - Shared Region Bar (Includes "All Regions" and Regional Tabs)
-    private var regionBar: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
-                ForEach(RegionFilter.allCases) { region in
-                    Button {
-                        viewModel.selectedRegion = region
-                    } label: {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(region.label)
-                                .font(.system(size: 12, weight: viewModel.selectedRegion == region ? .bold : .medium))
-                            Text(region.subtitle)
-                                .font(.system(size: 9))
-                                .opacity(0.8)
-                        }
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 8)
-                        .background(viewModel.selectedRegion == region ? Color(red: 0.05, green: 0.35, blue: 0.32) : Color.scoutSecondaryBackground)
-                        .foregroundColor(viewModel.selectedRegion == region ? .white : .primary)
-                        .cornerRadius(10)
+            .navigationTitle("Filters & Settings")
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") {
+                        showFiltersSheet = false
                     }
                 }
             }
