@@ -14,7 +14,6 @@ import Combine
 public enum ProductTier: String, CaseIterable {
     case monthly = "com.AlexMohit.REScout.pro.monthly"
     case yearly = "com.AlexMohit.REScout.pro.yearly"
-    case lifetime = "com.AlexMohit.REScout.pro.lifetime"
 }
 
 @MainActor

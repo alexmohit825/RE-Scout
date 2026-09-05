@@ -88,20 +88,10 @@ public struct PaywallView: View {
                             ) {
                                 // Select
                             }
-                            
-                            REProductCardView(
-                                title: "Lifetime Pro Access",
-                                subtitle: "One-time payment, lifetime deal updates",
-                                badge: "LIFETIME",
-                                isSelected: false,
-                                priceString: "$29.99"
-                            ) {
-                                // Select
-                            }
                         } else {
                             ForEach(subscriptionManager.products, id: \.id) { product in
                                 let isSelected = (selectedProduct?.id == product.id) || (selectedProduct == nil && product.id.contains("yearly"))
-                                let badgeText = product.id.contains("yearly") ? "SAVE 44%" : (product.id.contains("lifetime") ? "LIFETIME" : nil)
+                                let badgeText = product.id.contains("yearly") ? "SAVE 44%" : nil
                                 
                                 REProductCardView(
                                     title: product.displayName,
